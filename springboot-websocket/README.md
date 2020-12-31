@@ -3,7 +3,6 @@ websocket最伟大之处在于服务器和客户端可以在给定的时间范�
 
 实现功能：springboot整合websocket实现一对一，多对多聊天系统
 
-**支持作者就Star Mua~**
 
 ## 依赖
 ```xml
@@ -324,5 +323,3 @@ public class WebSocketController {
 </html>
 
 ```
-## 效果图
-![在这里插入图片描述](https://img-blog.csdnimg.cn/20190419190241179.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3FxXzM4NzYyMjM3,size_16,color_FFFFFF,t_70)
