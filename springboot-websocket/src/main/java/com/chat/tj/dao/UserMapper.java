@@ -21,7 +21,7 @@ public interface UserMapper {
     @Select("SELECT a.room_id,a.room_name FROM websocket.room a left join websocket.room_user b on a.room_id =b.room_id where b.user_id=#{userId}")
     List<RoomEntity> getRoomListByUserId(Integer userId);
 
-    @Select("SELECT a.* FROM websocket.user a where a.user_id in (select user_id as userId from websocket.friend_relation b " +
+    @Select("SELECT a.* FROM  websocket.user a where a.user_id in (select user_id as userId from websocket.friend_relation b " +
             "where b.friend_id = #{userId} union all select friend_id as userId from websocket.friend_relation c where c.user_id =#{userId})")
     List<UserResVO> getFriendList(Integer userId);
 
