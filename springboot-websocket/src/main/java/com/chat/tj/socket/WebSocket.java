@@ -1,10 +1,8 @@
 package com.chat.tj.socket;
 
-import com.chat.tj.model.SendMsg;
 import com.alibaba.fastjson.JSON;
-import com.alibaba.fastjson.JSONObject;
+import com.chat.tj.model.SendMsg;
 import com.chat.tj.model.entity.RoomEntity;
-import com.chat.tj.model.entity.UserEntity;
 import com.chat.tj.model.vo.res.RoomMemberResVO;
 import com.chat.tj.model.vo.res.UserResVO;
 import com.chat.tj.service.UserService;
@@ -102,12 +100,15 @@ public class WebSocket {
             map1.put("messageType", 1);
             map1.put("sender", username);
             //请求长连接时将用户加入聊天大厅
-            initRoom.put(username,this);
-            if(clients.get("-1")==null){
-                clients.put("-1",initRoom);
+            initRoom.put(username, this);
+            if (clients.get("-1") == null) {
+                clients.put("-1", initRoom);
             }
+            SendMsg msg = new SendMsg();
+            msg.setRoomId("-1");
+            msg.setSender("系统");
             //告诉聊天大厅的所有人用户上线
-            sendMessageAll(JSON.toJSONString(map1), username,"-1");
+            sendMessageAll(msg);
             //给自己发一条消息：告诉自己现在都有谁在线
             Map<String, Object> map2 = new HashMap<>();
             //messageType 1代表上线 2代表下线 3代表在线名单 4代表普通消息
@@ -115,17 +116,18 @@ public class WebSocket {
             //移除掉自己
             Set<String> set = initRoom.keySet();
             map2.put("onlineUsers", set);
-            sendMessageTo(JSON.toJSONString(map2), username,"-1");
+            msg.setReceiver(username);
+            sendMessageTo(msg);
             //
-            if(!StringUtils.isEmpty(roomId)&&!"-1".equals(roomId)){
-                Integer num=roomOnlineNum.get(roomId);
-                if(num==null){
+            if (!StringUtils.isEmpty(roomId) && !"-1".equals(roomId)) {
+                Integer num = roomOnlineNum.get(roomId);
+                if (num == null) {
                     num = 0;
                 }
 
-                Map<String, WebSocket> temp =null;
+                Map<String, WebSocket> temp = null;
                 List<String> roomIds = getrooms();
-                if(roomIds!=null){
+                if (roomIds != null) {
                     //查看群组是否存在,如果群组存在
                     if(roomIds.contains(roomId)){
                         temp = clients.get(roomId);
@@ -173,7 +175,10 @@ public class WebSocket {
             map1.put("messageType", 2);
             map1.put("onlineUsers", clients.get(roomId).keySet());
             map1.put("sender", username);
-            sendMessageAll(JSON.toJSONString(map1), username,roomId);
+            SendMsg msg = new SendMsg();
+            msg.setSender(username);
+            msg.setRoomId("-1");
+            sendMessageAll(msg);
         } catch (IOException e) {
             log.info(username + "下线的时候通知所有人发生了错误");
         }
@@ -207,22 +212,21 @@ public class WebSocket {
                     UserResVO user=members.stream().filter(s->s.getUserName().equals(msg.getSender())).findAny().orElse(null);
                     //发送人在群组
                     if(user!=null){
-                        sendMessageAll(JSON.toJSONString(msg), msg.getSender(),msg.getRoomId());
+                        sendMessageAll(msg);
                     }
                     //发送人不在群组
                     msg.setMessage("您未加入该群组，无法发送信息，请先加入该群组！");
-                    msg.setSender("系统");
                     msg.setReceiver(sender);
-                    sendMessageTo(JSON.toJSONString(msg),sender,msg.getRoomId());
+                    sendMessageTo(msg);
                     return;
                 }
                 //群组不存在
                 msg.setMessage("发送的群组不存在，信息发送错误");
-                msg.setSender("系统");
                 msg.setReceiver(sender);
-                sendMessageTo(JSON.toJSONString(msg),sender,msg.getRoomId());
+                sendMessageTo(msg);
 
             } else {
+                msg.setRoomId("-1");
                 List<UserResVO> userResVOS = userService.findFriendList(getUserId(msg.getSender()));
                 UserResVO friend =userResVOS.stream().filter(s ->msg.getReceiver().equals(s.getUserName())).findAny().orElse(null);
                 //想发送的用户不是好友
@@ -230,31 +234,39 @@ public class WebSocket {
                     msg.setMessage("您和对方不是好友，请先添加好友在发送信息");
                     msg.setSender("系统");
                     msg.setReceiver(sender);
-                    sendMessageTo(JSON.toJSONString(msg),sender,"-1");
+                    sendMessageTo(msg);
                     return;
                 }
-                sendMessageTo(JSON.toJSONString(msg), msg.getReceiver(), "-1");
+                sendMessageTo(msg);
             }
         } catch (Exception e) {
             log.info("发生了错误了");
         }
     }
 
-    public synchronized void sendMessageTo(String message, String toUserName,String roomId) throws IOException {
+    public synchronized void sendMessageTo(SendMsg message) throws IOException {
+        System.out.println(clients.get(roomId).values());
+        if (!StringUtils.isEmpty(message.getReceiver()) && initRoom.get(message.getReceiver()) == null) {
+            message.setMessage("发送用户未上线，发送失败");
+            initRoom.get(message.getSender()).session.getAsyncRemote().sendText(JSON.toJSONString(message));
+            return;
+        }
         for (WebSocket item : clients.get(roomId).values()) {
-            if (item.username.equals(toUserName)) {
-                item.session.getAsyncRemote().sendText(message);
+            if (item.username.equals(message.getReceiver())) {
+                item.session.getAsyncRemote().sendText(JSON.toJSONString(message));
+                System.out.println(message);
                 break;
             }
         }
     }
 
-    public synchronized void sendMessageAll(String message, String fromUserName,String roomId) throws IOException {
+    public synchronized void sendMessageAll(SendMsg msg) throws IOException {
+
         for (WebSocket item : clients.get(roomId).values()) {
-            if(item.username.equals(fromUserName)){
+            if (item.username.equals(msg.getSender())) {
                 continue;
             }
-            item.session.getAsyncRemote().sendText(message);
+            item.session.getAsyncRemote().sendText(JSON.toJSONString(msg));
         }
     }
 
