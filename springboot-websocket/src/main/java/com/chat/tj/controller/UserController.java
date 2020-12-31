@@ -1,7 +1,6 @@
 package com.chat.tj.controller;
 
 import com.alibaba.excel.EasyExcel;
-import com.alibaba.excel.ExcelWriter;
 import com.chat.tj.common.config.ExportConfig;
 import com.chat.tj.model.entity.RoomEntity;
 import com.chat.tj.model.entity.UserEntity;
@@ -126,7 +125,7 @@ public class UserController {
         EasyExcel.write(filename,UserResVO.class).sheet("测试").doWrite(list);
     }
 
-    @PostMapping("/exportWithTemplate")
+    @PostMapping("/exportWithTemplate ")
     @ApiOperation("使用模板填充导出（带样式）")
     public void exportData2(String userName, HttpServletResponse response, HttpServletRequest request){
         List<UserResVO> list = userService.findUserList(userName);
