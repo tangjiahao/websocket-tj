@@ -60,5 +60,15 @@ public interface UserMapper {
     @Select("SELECT count(1) FROM websocket.room_user where room_id=#{roomId} and user_id=#{userId} and type=1")
     Integer isRoomCreater(RoomReqVO reqVO);
 
+    @SelectProvider(type = UserSql.class, method = "getUserList")
+    List<UserResVO> getUserList(String userName);
+
+    @Insert("INSERT INTO websocket.friend_relation VALUES(#{userId},#{friendId},now())")
+    void makeFriend(Integer userId,Integer friendId);
+
+    @Delete("delete from websocket.friend_relation where (user_id=#{userId} and friend_id=#{friendId}) or (user_id=#{friendId} and friend_id=#{userId})")
+    void deleteFriend(Integer userId,Integer friendId);
+
+
 
 }

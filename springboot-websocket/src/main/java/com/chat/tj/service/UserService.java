@@ -38,4 +38,10 @@ public interface UserService {
 
     ResponseVo<Integer> deleteRoom(RoomReqVO reqVO);
 
+    List<UserResVO> findUserList(String userName);
+
+    ResponseVo<Integer> makeFriend(Integer userId,Integer friendId);
+
+    ResponseVo<Integer> deleteFriend(Integer userId,Integer friendId);
+
 }
