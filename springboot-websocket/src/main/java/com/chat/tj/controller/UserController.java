@@ -1,7 +1,10 @@
 package com.chat.tj.controller;
 
 import com.alibaba.excel.EasyExcel;
+import com.alibaba.excel.ExcelWriter;
+import com.alibaba.excel.write.metadata.WriteSheet;
 import com.chat.tj.common.config.ExportConfig;
+import com.chat.tj.common.util.FileUtil;
 import com.chat.tj.model.entity.RoomEntity;
 import com.chat.tj.model.entity.UserEntity;
 import com.chat.tj.model.vo.ResponseVo;
@@ -21,7 +24,11 @@ import org.springframework.web.bind.annotation.*;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
+import java.io.BufferedOutputStream;
 import java.io.File;
+import java.io.IOException;
+import java.io.OutputStream;
+import java.net.URLEncoder;
 import java.util.List;
 
 /**
@@ -127,14 +134,32 @@ public class UserController {
 
     @PostMapping("/exportWithTemplate ")
     @ApiOperation("使用模板填充导出（带样式）")
-    public void exportData2(String userName, HttpServletResponse response, HttpServletRequest request){
+    public void exportData2(String userName, HttpServletResponse response, HttpServletRequest request) throws IOException {
         List<UserResVO> list = userService.findUserList(userName);
         String template = ExportConfig.TEMPLATE_PATH+ File.separator+ExportConfig.TEMPLATE_NAME;
         String p1 = this.getClass().getResource("/").getPath()+template;
-        System.out.println(p1+1);
+        System.out.println(p1 + 12);
         String filename = "聊天导出数据测试"+System.currentTimeMillis()+".xlsx";
         // 写法1
-        EasyExcel.write(filename,UserResVO.class).withTemplate(p1).sheet().doFill(list);
+//        EasyExcel.write(filename,UserResVO.class).withTemplate(p1).sheet().doFill(list);
+
+        OutputStream out = null;
+        BufferedOutputStream bos = null;
+        String templateFileName = FileUtil.getPath() + "excel" + File.separator + "template.xlsx";
+
+        response.setContentType("application/vnd.ms-excel");
+        response.setCharacterEncoding("utf-8");
+        String fileName = URLEncoder.encode("下载后的名称tj.xlsx", "utf-8");
+        response.setHeader("Content-disposition", "attachment; filename=" + new String(fileName.getBytes("UTF-8"), "ISO-8859-1"));
+
+        out = response.getOutputStream();
+        bos = new BufferedOutputStream(out);
+
+        //读取Excel
+        ExcelWriter excelWriter = EasyExcel.write(bos).withTemplate(templateFileName).build();
+        WriteSheet writeSheet = EasyExcel.writerSheet().build();
+        excelWriter.fill(list, writeSheet);
+
 
     }
 
