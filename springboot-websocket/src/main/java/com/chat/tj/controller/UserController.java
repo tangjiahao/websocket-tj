@@ -131,7 +131,7 @@ public class UserController {
         List<UserResVO> list = userService.findUserList(userName);
         String template = ExportConfig.TEMPLATE_PATH+ File.separator+ExportConfig.TEMPLATE_NAME;
         String p1 = this.getClass().getResource("/").getPath()+template;
-        System.out.println(p1);
+        System.out.println(p1+1);
         String filename = "聊天导出数据测试"+System.currentTimeMillis()+".xlsx";
         // 写法1
         EasyExcel.write(filename,UserResVO.class).withTemplate(p1).sheet().doFill(list);
