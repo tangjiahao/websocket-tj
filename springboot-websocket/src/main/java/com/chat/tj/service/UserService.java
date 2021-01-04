@@ -4,9 +4,9 @@ import com.chat.tj.model.entity.RoomEntity;
 import com.chat.tj.model.entity.UserEntity;
 import com.chat.tj.model.vo.ResponseVo;
 import com.chat.tj.model.vo.req.RoomReqVO;
+import com.chat.tj.model.vo.req.UserReqVO;
 import com.chat.tj.model.vo.res.RoomMemberResVO;
 import com.chat.tj.model.vo.res.UserResVO;
-import org.springframework.stereotype.Service;
 
 import java.util.List;
 
@@ -24,7 +24,7 @@ public interface UserService {
 
     List<RoomMemberResVO> getRoomMemberList(Integer roomId);
 
-    ResponseVo<UserResVO> login(UserEntity userEntity);
+    ResponseVo<UserResVO> login(UserReqVO reqVO);
 
     ResponseVo<Integer> register(UserEntity userEntity);
 

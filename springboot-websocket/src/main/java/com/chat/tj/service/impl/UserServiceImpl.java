@@ -1,12 +1,12 @@
 package com.chat.tj.service.impl;
 
 import com.chat.tj.common.constant.UserConstant;
-import com.chat.tj.controller.UserController;
 import com.chat.tj.dao.UserMapper;
 import com.chat.tj.model.entity.RoomEntity;
 import com.chat.tj.model.entity.UserEntity;
 import com.chat.tj.model.vo.ResponseVo;
 import com.chat.tj.model.vo.req.RoomReqVO;
+import com.chat.tj.model.vo.req.UserReqVO;
 import com.chat.tj.model.vo.res.RoomMemberResVO;
 import com.chat.tj.model.vo.res.UserResVO;
 import com.chat.tj.service.UserService;
@@ -14,7 +14,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 
-import javax.xml.ws.Response;
 import java.util.List;
 
 /**
@@ -45,12 +44,12 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public ResponseVo<UserResVO> login(UserEntity userEntity) {
-        UserResVO user = userMapper.selectUser(userEntity);
+    public ResponseVo<UserResVO> login(UserReqVO reqVO) {
+        UserResVO user = userMapper.selectUser(reqVO);
         if (user != null) {
             return ResponseVo.content(user);
         }
-        return ResponseVo.failed("密码账号错误，登录失败");
+        return ResponseVo.failed("密码账号错误,登录失败");
     }
 
     @Override

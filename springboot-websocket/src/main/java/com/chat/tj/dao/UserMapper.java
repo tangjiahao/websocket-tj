@@ -3,6 +3,7 @@ package com.chat.tj.dao;
 import com.chat.tj.model.entity.RoomEntity;
 import com.chat.tj.model.entity.UserEntity;
 import com.chat.tj.model.vo.req.RoomReqVO;
+import com.chat.tj.model.vo.req.UserReqVO;
 import com.chat.tj.model.vo.res.RoomMemberResVO;
 import com.chat.tj.model.vo.res.UserResVO;
 import org.apache.ibatis.annotations.*;
@@ -33,7 +34,7 @@ public interface UserMapper {
     void saveUser(UserEntity userEntity);
 
     @Select("SELECT * FROM websocket.user where user_name=#{userName} and pwd=#{pwd} limit 1")
-    UserResVO selectUser(UserEntity userEntity);
+    UserResVO selectUser(UserReqVO userEntity);
 
     @SelectProvider(type = UserSql.class, method = "getRoomList")
     List<RoomEntity> getRoomList(String roomName);

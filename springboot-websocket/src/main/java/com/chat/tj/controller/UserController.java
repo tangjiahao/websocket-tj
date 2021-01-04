@@ -68,9 +68,7 @@ public class UserController {
     @PostMapping("/login")
     @ApiOperation(value = "登录")
     public ResponseVo<UserResVO> login(@RequestBody UserReqVO reqVO) {
-        UserEntity userEntity = new UserEntity();
-        BeanUtils.copyProperties(reqVO, userEntity);
-        return userService.login(userEntity);
+        return userService.login(reqVO);
     }
 
     @PostMapping("/register")
