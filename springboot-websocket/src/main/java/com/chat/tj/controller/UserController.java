@@ -4,7 +4,8 @@ import com.alibaba.excel.EasyExcel;
 import com.alibaba.excel.ExcelWriter;
 import com.alibaba.excel.write.metadata.WriteSheet;
 import com.chat.tj.common.config.ExportConfig;
-import com.chat.tj.common.util.FileUtil;
+import com.chat.tj.common.excel.ExcelStyleStrategy;
+import com.chat.tj.common.util.ExcelUtil;
 import com.chat.tj.model.entity.RoomEntity;
 import com.chat.tj.model.entity.UserEntity;
 import com.chat.tj.model.vo.ResponseVo;
@@ -24,12 +25,11 @@ import org.springframework.web.bind.annotation.*;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
-import java.io.BufferedOutputStream;
-import java.io.File;
 import java.io.IOException;
-import java.io.OutputStream;
-import java.net.URLEncoder;
+import java.io.InputStream;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * @description :
@@ -69,7 +69,7 @@ public class UserController {
     @ApiOperation(value = "登录")
     public ResponseVo<UserResVO> login(@RequestBody UserReqVO reqVO) {
         UserEntity userEntity = new UserEntity();
-        BeanUtils.copyProperties(reqVO,userEntity);
+        BeanUtils.copyProperties(reqVO, userEntity);
         return userService.login(userEntity);
     }
 
@@ -77,7 +77,7 @@ public class UserController {
     @ApiOperation(value = "注册")
     public ResponseVo<Integer> register(@Valid @RequestBody UserReqVO reqVO) {
         UserEntity userEntity = new UserEntity();
-        BeanUtils.copyProperties(reqVO,userEntity);
+        BeanUtils.copyProperties(reqVO, userEntity);
         return userService.register(userEntity);
     }
 
@@ -113,52 +113,64 @@ public class UserController {
 
     @PostMapping("/makeFriend")
     @ApiOperation(value = "添加好友")
-    public ResponseVo<Integer> makeFriend(Integer userId,Integer friendId) {
-        return userService.makeFriend(userId,friendId);
+    public ResponseVo<Integer> makeFriend(Integer userId, Integer friendId) {
+        return userService.makeFriend(userId, friendId);
     }
 
     @PostMapping("/deleteFriend")
     @ApiOperation(value = "删除好友")
-    public ResponseVo<Integer> deleteFriend(Integer userId,Integer friendId) {
-        return userService.deleteFriend(userId,friendId);
+    public ResponseVo<Integer> deleteFriend(Integer userId, Integer friendId) {
+        return userService.deleteFriend(userId, friendId);
     }
 
     @PostMapping("/export")
     @ApiOperation("不用模板导出")
-    public void exportData(String userName, HttpServletResponse response, HttpServletRequest request){
+    public void exportData(String userName, HttpServletResponse response, HttpServletRequest request) throws IOException {
         List<UserResVO> list = userService.findUserList(userName);
-        String filename = "聊天导出数据测试"+System.currentTimeMillis()+".xlsx";
-        // 写法1
-        EasyExcel.write(filename,UserResVO.class).sheet("测试").doWrite(list);
+        String fileName = "聊天导出数据测试" + System.currentTimeMillis();
+        // 设置导出excel响应头样式
+        ExcelUtil.setExcelResponse(request, response, fileName);
+        // 写法1,只有一个sheet页面导出
+        // EasyExcel.write(response.getOutputStream(), UserResVO.class).sheet("测试").doWrite(list);
+
+        // 写法2，多sheet页面导出
+        ExcelWriter writer = null;
+        // 主要设置excel导出使用默认样式
+        writer = EasyExcel.write(response.getOutputStream()).registerWriteHandler(new ExcelStyleStrategy()).build();
+        WriteSheet sheet1 = EasyExcel.writerSheet(0, "导出数据1").head(UserResVO.class).build();
+        writer.write(list, sheet1);
+        WriteSheet sheet2 = EasyExcel.writerSheet(1, "导出数据2").head(UserResVO.class).build();
+        writer.write(list, sheet2);
+        writer.finish();
     }
 
-    @PostMapping("/exportWithTemplate ")
-    @ApiOperation("使用模板填充导出（带样式）")
+    @PostMapping("/exportWithTemplate")
+    @ApiOperation("使用模板填充导出(带样式)")
     public void exportData2(String userName, HttpServletResponse response, HttpServletRequest request) throws IOException {
         List<UserResVO> list = userService.findUserList(userName);
-        String template = ExportConfig.TEMPLATE_PATH+ File.separator+ExportConfig.TEMPLATE_NAME;
-        String p1 = this.getClass().getResource("/").getPath()+template;
-        System.out.println(p1 + 12);
-        String filename = "聊天导出数据测试"+System.currentTimeMillis()+".xlsx";
-        // 写法1
-//        EasyExcel.write(filename,UserResVO.class).withTemplate(p1).sheet().doFill(list);
 
-        OutputStream out = null;
-        BufferedOutputStream bos = null;
-        String templateFileName = FileUtil.getPath() + "excel" + File.separator + "template.xlsx";
+        String fileName = "chatUserExport";
+        // 设置导出excel表头样式
+        ExcelUtil.setExcelResponse(request, response, fileName);
+        // 获取模板
+        String template = ExportConfig.TEMPLATE_PATH + ExportConfig.TEMPLATE_NAME;
+        InputStream templateInputStream = this.getClass().getResourceAsStream(template);
+        // 写法1,只有一个sheet页面导出
+        // EasyExcel.write(response.getOutputStream(), UserResVO.class).withTemplate(templateInputStream).sheet().doFill(list);
 
-        response.setContentType("application/vnd.ms-excel");
-        response.setCharacterEncoding("utf-8");
-        String fileName = URLEncoder.encode("下载后的名称tj.xlsx", "utf-8");
-        response.setHeader("Content-disposition", "attachment; filename=" + new String(fileName.getBytes("UTF-8"), "ISO-8859-1"));
+        // 写法2，多sheet页面导出
+        ExcelWriter writer = null;
+        writer = EasyExcel.write(response.getOutputStream()).withTemplate(templateInputStream).build();
+        WriteSheet sheet1 = EasyExcel.writerSheet(0, "导出数据1").build();
+        Map<String, Object> map = new HashMap<>();
+        map.put("date", ExcelUtil.getNowTime());
+        // 填充一些注释的特殊数据
+        writer.fill(map, sheet1);
+        writer.fill(list, sheet1);
 
-        out = response.getOutputStream();
-        bos = new BufferedOutputStream(out);
-
-        //读取Excel
-        ExcelWriter excelWriter = EasyExcel.write(bos).withTemplate(templateFileName).build();
-        WriteSheet writeSheet = EasyExcel.writerSheet().build();
-        excelWriter.fill(list, writeSheet);
+        WriteSheet sheet2 = EasyExcel.writerSheet(1, "导出数据2").build();
+        writer.fill(list, sheet2);
+        writer.finish();
 
 
     }

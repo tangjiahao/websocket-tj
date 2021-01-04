@@ -35,17 +35,17 @@ public class WebSocket {
     /**
      * 以用户的姓名为key，WebSocket为对象保存起来
      */
-    private static Map<String,Map<String, WebSocket>> clients = new ConcurrentHashMap<>(100);
+    private static Map<String, Map<String, WebSocket>> clients = new ConcurrentHashMap<>(100);
 
     /**
      * 在某个群组中在线人数
      */
-    private static Map<String,Integer> roomOnlineNum = new ConcurrentHashMap<>();
+    private static Map<String, Integer> roomOnlineNum = new ConcurrentHashMap<>();
 
     /**
      * 聊天大厅，所有人连接进来信息都会进入这里
      */
-    private static Map<String,WebSocket> initRoom ;
+    private static Map<String, WebSocket> initRoom;
 
 
     /**
@@ -65,7 +65,7 @@ public class WebSocket {
     private static UserService userService;
 
     @Autowired
-    public  void setUserService(UserService userService) {
+    public void setUserService(UserService userService) {
         WebSocket.userService = userService;
     }
 
@@ -88,67 +88,61 @@ public class WebSocket {
      * @param session
      */
     @OnOpen
-    public void onOpen(@PathParam("username") String username,@PathParam("roomId") String roomId, Session session) {
+    public void onOpen(@PathParam("username") String username, @PathParam("roomId") String roomId, Session session) {
 
 
         this.username = username;
         this.session = session;
         this.roomId = roomId;
 
-        try {
-            Map<String, Object> map1 = new HashMap<>();
-            map1.put("messageType", 1);
-            map1.put("sender", username);
-            //请求长连接时将用户加入聊天大厅
-            initRoom.put(username, this);
-            if (clients.get("-1") == null) {
-                clients.put("-1", initRoom);
-            }
-            SendMsg msg = new SendMsg();
-            msg.setRoomId("-1");
-            msg.setSender("系统");
-            //告诉聊天大厅的所有人用户上线
-            sendMessageAll(msg);
-            //给自己发一条消息：告诉自己现在都有谁在线
-            Map<String, Object> map2 = new HashMap<>();
-            //messageType 1代表上线 2代表下线 3代表在线名单 4代表普通消息
-            map2.put("messageType", 3);
-            //移除掉自己
-            Set<String> set = initRoom.keySet();
-            map2.put("onlineUsers", set);
-            msg.setReceiver(username);
-            sendMessageTo(msg);
-            //
-            if (!StringUtils.isEmpty(roomId) && !"-1".equals(roomId)) {
-                Integer num = roomOnlineNum.get(roomId);
-                if (num == null) {
-                    num = 0;
-                }
 
-                Map<String, WebSocket> temp = null;
-                List<String> roomIds = getrooms();
-                if (roomIds != null) {
-                    //查看群组是否存在,如果群组存在
-                    if(roomIds.contains(roomId)){
-                        temp = clients.get(roomId);
-                        if(clients.get(roomId)==null){
-                            temp = new ConcurrentHashMap<>(40);
-                        }
-                        //把自己的信息加入到map当中去
-                        temp.put(username,this);
-                        clients.put(roomId, temp);
-                        roomOnlineNum.put(roomId,++num);
-                        log.info("现在来连接的用户名：" + username+"想连接的群组："+roomId);
-                        log.info("群组"+roomId+"有新连接加入！ 当前在线人数" + roomOnlineNum.get(roomId));
+        Map<String, Object> map1 = new HashMap<>();
+        map1.put("messageType", 1);
+        map1.put("sender", username);
+        //请求长连接时将用户加入聊天大厅
+        initRoom.put(username, this);
+        if (clients.get("-1") == null) {
+            clients.put("-1", initRoom);
+        }
+        SendMsg msg = new SendMsg();
+        msg.setRoomId("-1");
+        msg.setSender("系统");
+        //告诉聊天大厅的所有人用户上线
+        // sendMessageAll(msg);
+        //给自己发一条消息：告诉自己现在都有谁在线
+        Map<String, Object> map2 = new HashMap<>();
+        //messageType 1代表上线 2代表下线 3代表在线名单 4代表普通消息
+        map2.put("messageType", 3);
+        //移除掉自己
+        Set<String> set = initRoom.keySet();
+        map2.put("onlineUsers", set);
+        msg.setReceiver(username);
+        // sendMessageTo(msg);
+        //
+        if (!StringUtils.isEmpty(roomId) && !"-1".equals(roomId)) {
+            Integer num = roomOnlineNum.get(roomId);
+            if (num == null) {
+                num = 0;
+            }
+
+            Map<String, WebSocket> temp = null;
+            List<String> roomIds = getrooms();
+            if (roomIds != null) {
+                //查看群组是否存在,如果群组存在
+                if (roomIds.contains(roomId)) {
+                    temp = clients.get(roomId);
+                    if (clients.get(roomId) == null) {
+                        temp = new ConcurrentHashMap<>(40);
                     }
+                    //把自己的信息加入到map当中去
+                    temp.put(username, this);
+                    clients.put(roomId, temp);
+                    roomOnlineNum.put(roomId, ++num);
+                    log.info("现在来连接的用户名：" + username + "想连接的群组：" + roomId);
+                    log.info("群组" + roomId + "有新连接加入！ 当前在线人数" + roomOnlineNum.get(roomId));
                 }
-
             }
 
-
-
-        } catch (IOException e) {
-            log.info(username + "上线的时候通知所有人发生了错误");
         }
 
 
@@ -165,8 +159,8 @@ public class WebSocket {
      */
     @OnClose
     public void onClose() {
-        int num= roomOnlineNum.get(roomId);
-        roomOnlineNum.put(roomId,--num);
+        int num = roomOnlineNum.get(roomId);
+        roomOnlineNum.put(roomId, --num);
         //webSockets.remove(this);
         clients.get(roomId).remove(username);
         try {
@@ -196,10 +190,10 @@ public class WebSocket {
         try {
             log.info("来自客户端消息：" + message + "客户端的id是：" + session.getId());
             // JSONObject jsonObject = JSON.parseObject(message);
-            SendMsg msg = JSON.parseObject(message,SendMsg.class);
-            String sender =msg.getSender();
-            if(msg.getSender().contains("{")){
-                sender=msg.getSender().substring(msg.getSender().indexOf("{")+1,msg.getSender().indexOf("}"));
+            SendMsg msg = JSON.parseObject(message, SendMsg.class);
+            String sender = msg.getSender();
+            if (msg.getSender().contains("{")) {
+                sender = msg.getSender().substring(msg.getSender().indexOf("{") + 1, msg.getSender().indexOf("}"));
                 msg.setSender(sender);
             }
             //messageType 1代表上线 2代表下线 3代表在线名单  4代表普通消息
@@ -208,10 +202,10 @@ public class WebSocket {
                 msg.setReceiver("所有人");
                 List<RoomMemberResVO> members = userService.getRoomMemberList(Integer.parseInt(msg.getRoomId()));
                 //如果群组存在
-                if(!CollectionUtils.isEmpty(members)){
-                    UserResVO user=members.stream().filter(s->s.getUserName().equals(msg.getSender())).findAny().orElse(null);
+                if (!CollectionUtils.isEmpty(members)) {
+                    UserResVO user = members.stream().filter(s -> s.getUserName().equals(msg.getSender())).findAny().orElse(null);
                     //发送人在群组
-                    if(user!=null){
+                    if (user != null) {
                         sendMessageAll(msg);
                     }
                     //发送人不在群组
@@ -228,9 +222,9 @@ public class WebSocket {
             } else {
                 msg.setRoomId("-1");
                 List<UserResVO> userResVOS = userService.findFriendList(getUserId(msg.getSender()));
-                UserResVO friend =userResVOS.stream().filter(s ->msg.getReceiver().equals(s.getUserName())).findAny().orElse(null);
+                UserResVO friend = userResVOS.stream().filter(s -> msg.getReceiver().equals(s.getUserName())).findAny().orElse(null);
                 //想发送的用户不是好友
-                if(friend==null) {
+                if (friend == null) {
                     msg.setMessage("您和对方不是好友，请先添加好友在发送信息");
                     msg.setSender("系统");
                     msg.setReceiver(sender);
@@ -275,32 +269,34 @@ public class WebSocket {
     }
 
     /**
-    * 建立连接
-    * @param roomId 频道号 0 表示默认频道号，所有用户一开始都会加入该频道（用于私聊）,1之后的频道号代表群组号
-    * @param username 用户名
-    */
-    public synchronized void addConnection(String roomId,String username,Session session){
-        this.roomId =roomId;
+     * 建立连接
+     *
+     * @param roomId   频道号 0 表示默认频道号，所有用户一开始都会加入该频道（用于私聊）,1之后的频道号代表群组号
+     * @param username 用户名
+     */
+    public synchronized void addConnection(String roomId, String username, Session session) {
+        this.roomId = roomId;
         this.username = username;
-        this.session =session;
-        clients.get(roomId).put(username,this);
+        this.session = session;
+        clients.get(roomId).put(username, this);
     }
 
-    public boolean findUserByRoomId(String username,String roomId){
-        if(clients.get(roomId)==null){
+    public boolean findUserByRoomId(String username, String roomId) {
+        if (clients.get(roomId) == null) {
             return false;
         }
         return clients.get(roomId).get(username) != null;
     }
-    public List<String> getrooms(){
-        List<RoomEntity> rooms =userService.getRoomList("");
-        if(CollectionUtils.isEmpty(rooms)){
+
+    public List<String> getrooms() {
+        List<RoomEntity> rooms = userService.getRoomList("");
+        if (CollectionUtils.isEmpty(rooms)) {
             return null;
         }
         return rooms.stream().map(RoomEntity::getRoomId).collect(Collectors.toList());
     }
 
-    public Integer getUserId(String username){
+    public Integer getUserId(String username) {
         return userService.getUserId(username);
     }
 
