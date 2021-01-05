@@ -65,6 +65,15 @@ public class TokenCache {
         return null;
     }
 
+    /**
+     * 删除缓存参数
+     *
+     * @param key 缓存的key
+     */
+    public static void remove(String key) {
+        localcache.invalidate(key);
+    }
+
     public static String getToken(HttpServletRequest request) {
         String headerToken = request.getHeader("token");
         return StringUtils.isNotBlank(headerToken) ? headerToken : request.getParameter("token");

@@ -21,6 +21,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
+import springfox.documentation.annotations.ApiIgnore;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -122,6 +123,7 @@ public class UserController {
     }
 
     @PostMapping("/export")
+    @ApiIgnore
     @ApiOperation("不用模板导出")
     public void exportData(String userName, HttpServletResponse response, HttpServletRequest request) throws IOException {
         List<UserResVO> list = userService.findUserList(userName);
@@ -143,6 +145,7 @@ public class UserController {
     }
 
     @PostMapping("/exportWithTemplate")
+    @ApiIgnore
     @ApiOperation("使用模板填充导出(带样式)")
     public void exportData2(String userName, HttpServletResponse response, HttpServletRequest request) throws IOException {
         List<UserResVO> list = userService.findUserList(userName);

@@ -1,14 +1,17 @@
 package com.chat.tj.auth.controller;
 
 import com.chat.tj.auth.service.AuthService;
+import com.chat.tj.auth.vo.AuthReqVO;
 import com.chat.tj.auth.vo.AuthResVO;
 import com.chat.tj.model.vo.ResponseVo;
-import com.chat.tj.model.vo.req.UserReqVO;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 
 import javax.validation.Valid;
 
@@ -26,7 +29,7 @@ public class AuthController {
 
     @PostMapping("/token")
     @ApiOperation("获取token")
-    public ResponseVo<AuthResVO> getToken(@RequestParam("accessKeyId") String accessKeyId, @Valid @RequestBody UserReqVO reqVO) {
-        return authService.getToken(accessKeyId, reqVO);
+    public ResponseVo<AuthResVO> getToken(@Valid @RequestBody AuthReqVO reqVO) {
+        return authService.getToken(reqVO.getAccessKeyId(), reqVO.getReqVO());
     }
 }

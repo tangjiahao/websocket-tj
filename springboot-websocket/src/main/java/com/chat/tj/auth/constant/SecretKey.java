@@ -9,5 +9,10 @@ public class SecretKey {
     /**
      * 访问秘钥ak
      */
-    public static String SECRET_KEY_AK = "ASDBNVSADG3K5T9A";
+    public static String SECRET_KEY_AK = "KOBEYYDS";
+
+    /**
+     * 私有秘钥sk
+     */
+    public static String SECRET_KEY_SK = "aSdFcVBn";
 }
