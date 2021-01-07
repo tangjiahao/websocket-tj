@@ -40,8 +40,6 @@ public class WebSocket {
      * 在某个群组中在线人数
      */
     private static Map<String, Integer> roomOnlineNum = new ConcurrentHashMap<>();
-
-
     /**
      * 会话
      */
@@ -162,42 +160,44 @@ public class WebSocket {
                 sender = msg.getSender().substring(msg.getSender().indexOf("{") + 1, msg.getSender().indexOf("}"));
                 msg.setSender(sender);
             }
-            //messageType 1代表上线 2代表下线 3代表在线名单  4代表普通消息
-            msg.setMessageType(4);
-            if ("All".equals(msg.getReceiver())) {
-                msg.setReceiver("所有人");
-                List<RoomMemberResVO> members = userService.getRoomMemberList(Integer.parseInt(msg.getRoomId()));
-                //如果群组存在
-                if (!CollectionUtils.isEmpty(members)) {
-                    UserResVO user = members.stream().filter(s -> s.getUserName().equals(msg.getSender())).findAny().orElse(null);
-                    //发送人在群组
-                    if (user != null) {
-                        sendMessageAll(msg);
+            //messageType 1代表上线 2代表下线 3代表在线名单  4代表普通消息 5图片消息 6文件消息
+            if (msg.getMessageType() == UserConstant.GENERAL_MESSAGE || msg.getMessageType() == UserConstant.IMG_MESSAGE ||
+                    msg.getMessageType() == UserConstant.FILE_MESSAGE) {
+                if ("All".equals(msg.getReceiver())) {
+                    msg.setReceiver("所有人");
+                    List<RoomMemberResVO> members = userService.getRoomMemberList(Integer.parseInt(msg.getRoomId()));
+                    //如果群组存在
+                    if (!CollectionUtils.isEmpty(members)) {
+                        UserResVO user = members.stream().filter(s -> s.getUserName().equals(msg.getSender())).findAny().orElse(null);
+                        //发送人在群组
+                        if (user != null) {
+                            sendMessageAll(msg);
+                        }
+                        //发送人不在群组
+                        msg.setMessage("您未加入该群组，无法发送信息，请先加入该群组！");
+                        msg.setReceiver(sender);
+                        sendMessageTo(msg);
+                        return;
                     }
-                    //发送人不在群组
-                    msg.setMessage("您未加入该群组，无法发送信息，请先加入该群组！");
+                    //群组不存在
+                    msg.setMessage("发送的群组不存在，信息发送错误");
                     msg.setReceiver(sender);
                     sendMessageTo(msg);
-                    return;
-                }
-                //群组不存在
-                msg.setMessage("发送的群组不存在，信息发送错误");
-                msg.setReceiver(sender);
-                sendMessageTo(msg);
 
-            } else {
-                msg.setRoomId(UserConstant.INIT_ROOM_ID);
-                List<UserResVO> userResVOS = userService.findFriendList(getUserId(msg.getSender()));
-                UserResVO friend = userResVOS.stream().filter(s -> msg.getReceiver().equals(s.getUserName())).findAny().orElse(null);
-                //想发送的用户不是好友
-                if (friend == null) {
-                    msg.setMessage("您和对方不是好友，请先添加好友在发送信息");
-                    msg.setSender("系统");
-                    msg.setReceiver(sender);
+                } else {
+                    msg.setRoomId(UserConstant.INIT_ROOM_ID);
+                    List<UserResVO> userResVOS = userService.findFriendList(getUserId(msg.getSender()));
+                    UserResVO friend = userResVOS.stream().filter(s -> msg.getReceiver().equals(s.getUserName())).findAny().orElse(null);
+                    //想发送的用户不是好友
+                    if (friend == null) {
+                        msg.setMessage("您和对方不是好友，请先添加好友在发送信息");
+                        msg.setSender("系统");
+                        msg.setReceiver(sender);
+                        sendMessageTo(msg);
+                        return;
+                    }
                     sendMessageTo(msg);
-                    return;
                 }
-                sendMessageTo(msg);
             }
         } catch (Exception e) {
             log.info("发生了错误了");

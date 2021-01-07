@@ -110,13 +110,13 @@ public class UserController {
         return ResponseVo.content(userService.findUserList(userName));
     }
 
-    @PostMapping("/makeFriend")
+    @GetMapping("/makeFriend")
     @ApiOperation(value = "添加好友")
     public ResponseVo<Integer> makeFriend(Integer userId, Integer friendId) {
         return userService.makeFriend(userId, friendId);
     }
 
-    @PostMapping("/deleteFriend")
+    @GetMapping("/deleteFriend")
     @ApiOperation(value = "删除好友")
     public ResponseVo<Integer> deleteFriend(Integer userId, Integer friendId) {
         return userService.deleteFriend(userId, friendId);

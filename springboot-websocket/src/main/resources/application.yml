@@ -7,6 +7,15 @@ spring:
     username: root
     password: 123456
     driver-class-name: com.mysql.jdbc.Driver
+  resources:
+    static-locations: classpath:/META-INF/resources/,classpath:/resources/,classpath:/static/,classpath:/public/,file:${file.path}
+  #设置上传单个文件大小和总数据大小
+  servlet:
+    multipart:
+      enabled: true
+      max-file-size: 50MB
+      max-request-size: 50MB
+
 
 mybatis:
   configuration:
@@ -14,6 +23,12 @@ mybatis:
 logging:
   level:
     learning: debug
-    com.zoctan.api.mapper : debug
+    com.zoctan.api.mapper: debug
+
+#文件保存的磁盘路径
+file:
+  path: D:/chat/upload/
+
+
 
 
