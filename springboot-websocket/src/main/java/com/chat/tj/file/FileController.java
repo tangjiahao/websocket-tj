@@ -37,9 +37,8 @@ public class FileController {
             inputStream = file.getInputStream();
         } catch (IOException e) {
             e.printStackTrace();
-            return ResponseVo.failed("上传文件大小超过20MB");
         }
-        //文件后缀
+        // 文件后缀
         String prefix = file.getOriginalFilename().substring(file.getOriginalFilename().lastIndexOf("."));
         String fileName = UUID.randomUUID() + prefix;
         File folder = new File(dirPath);
@@ -50,7 +49,7 @@ public class FileController {
         try {
             // 将文件上传到指定路径dirpath
             Files.copy(inputStream, new File(dirPath + fileName).toPath(), StandardCopyOption.REPLACE_EXISTING);
-            //拼接上传文件路径
+            // 拼接上传文件路径
             String fileDownloadUri = ServletUriComponentsBuilder.fromCurrentContextPath()
                     .path(fileName)
                     .toUriString();

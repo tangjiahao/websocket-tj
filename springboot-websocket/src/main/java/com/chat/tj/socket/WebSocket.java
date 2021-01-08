@@ -82,10 +82,15 @@ public class WebSocket {
         if (clients.get(UserConstant.INIT_ROOM_ID) == null) {
             Map<String, WebSocket> initRoom = new ConcurrentHashMap<>(40);
             clients.put(UserConstant.INIT_ROOM_ID, initRoom);
+            roomOnlineNum.put(UserConstant.INIT_ROOM_ID, 0);
         }
         // 将所有用户的连接都统一先放置到聊天大厅
+        if (clients.get(UserConstant.INIT_ROOM_ID).get(username) == null) {
+            clients.get(UserConstant.INIT_ROOM_ID).put(username, this);
+            roomOnlineNum.put(UserConstant.INIT_ROOM_ID, roomOnlineNum.get(UserConstant.INIT_ROOM_ID) + 1);
+        }
         clients.get(UserConstant.INIT_ROOM_ID).putIfAbsent(username, this);
-
+        log.info(username + "加入聊天大厅");
         if (!StringUtils.isEmpty(roomId) && !UserConstant.INIT_ROOM_ID.equals(roomId)) {
             Integer num = roomOnlineNum.get(roomId);
             if (num == null) {
@@ -124,22 +129,23 @@ public class WebSocket {
      * 连接关闭
      */
     @OnClose
-    public void onClose(@PathParam("userName") String userName) {
+    public void onClose() {
 
-        log.info(userName + "申请退出连接");
-        //webSockets.remove(this);
-
-        if (!CollectionUtils.isEmpty(clients.keySet())) {
-            clients.keySet().forEach(id -> {
-                for (WebSocket item : clients.get(id).values()) {
-                    if (item.username.equals(userName)) {
-                        int num = roomOnlineNum.get(id);
-                        roomOnlineNum.put(id, --num);
-                        clients.get(id).remove(userName);
-                        log.info("群组号：" + id + ",用户：" + userName + "已退出连接");
+        log.info(this.username + "申请退出连接");
+        if (!StringUtils.isEmpty(this.username)) {
+            String userName = this.username;
+            if (!CollectionUtils.isEmpty(clients.keySet())) {
+                clients.keySet().forEach(id -> {
+                    for (WebSocket item : clients.get(id).values()) {
+                        if (item.username.equals(userName)) {
+                            int num = roomOnlineNum.get(id);
+                            roomOnlineNum.put(id, --num);
+                            clients.get(id).remove(userName);
+                            log.info("群组号：" + id + ",用户：" + userName + "已退出连接");
+                        }
                     }
-                }
-            });
+                });
+            }
         }
     }
 
@@ -172,6 +178,7 @@ public class WebSocket {
                         //发送人在群组
                         if (user != null) {
                             sendMessageAll(msg);
+                            return;
                         }
                         //发送人不在群组
                         msg.setMessage("您未加入该群组，无法发送信息，请先加入该群组！");
@@ -212,8 +219,11 @@ public class WebSocket {
         }
         for (WebSocket item : clients.get(roomId).values()) {
             if (item.username.equals(message.getReceiver())) {
+                if (!item.session.isOpen()) {
+                    log.info(item.username + "连接已经被关闭");
+                }
                 item.session.getAsyncRemote().sendText(JSON.toJSONString(message));
-                System.out.println(message);
+                // System.out.println(message);
                 break;
             }
         }
@@ -231,19 +241,6 @@ public class WebSocket {
 
     public static synchronized int getOnlineCount() {
         return onlineNumber;
-    }
-
-    /**
-     * 建立连接
-     *
-     * @param roomId   频道号 0 表示默认频道号，所有用户一开始都会加入该频道（用于私聊）,1之后的频道号代表群组号
-     * @param username 用户名
-     */
-    public synchronized void addConnection(String roomId, String username, Session session) {
-        this.roomId = roomId;
-        this.username = username;
-        this.session = session;
-        clients.get(roomId).put(username, this);
     }
 
     public boolean findUserByRoomId(String username, String roomId) {
