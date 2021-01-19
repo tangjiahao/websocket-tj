@@ -151,7 +151,7 @@ public class UserController {
         List<UserResVO> list = userService.findUserList(userName);
 
         String fileName = "chatUserExport";
-        // 设置导出excel表头样式
+        // 设置导出excel表响应头样式
         ExcelUtil.setExcelResponse(request, response, fileName);
         // 获取模板
         String template = ExportConfig.TEMPLATE_PATH + ExportConfig.TEMPLATE_NAME;
@@ -172,7 +172,13 @@ public class UserController {
         WriteSheet sheet2 = EasyExcel.writerSheet(1, "导出数据2").build();
         writer.fill(list, sheet2);
         writer.finish();
+    }
 
+    @PostMapping("/exportImg")
+    @ApiIgnore
+    @ApiOperation("导出excel包含图片")
+    public void exportImg(String img, HttpServletResponse response, HttpServletRequest request) throws IOException {
+        //画图的顶级管理器，一个sheet只能获取一个（一定要注意这点）
 
     }
 

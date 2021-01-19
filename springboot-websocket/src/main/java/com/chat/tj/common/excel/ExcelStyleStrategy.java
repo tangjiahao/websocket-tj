@@ -26,7 +26,7 @@ public class ExcelStyleStrategy extends AbstractCellStyleStrategy {
         // 设置默认背景颜色
         XSSFColor defaultColor = new XSSFColor();
         byte[] byd = {(byte) 196, (byte) 223, (byte) 235};
-        defaultColor.setRGB(byd);
+        defaultColor.setRgb(byd);
         DEFAULT_CELL_STYLE.setFillPattern(FillPatternType.SOLID_FOREGROUND);
         DEFAULT_CELL_STYLE.setFillForegroundColor(defaultColor);
 
@@ -44,7 +44,7 @@ public class ExcelStyleStrategy extends AbstractCellStyleStrategy {
 
         // 设置字体
         Font font = workbook.createFont();
-        font.setBold(true);
+        font.setBoldweight((short) 2);
         font.setFontName("楷体");
         // font.setColor(HSSFColor.HSSFColorPredefined.WHITE.getIndex());
         font.setFontHeightInPoints((short) 12);
@@ -58,7 +58,7 @@ public class ExcelStyleStrategy extends AbstractCellStyleStrategy {
 
         XSSFColor whiteColor = new XSSFColor();
         byte[] byw = {(byte) 255, (byte) 255, (byte) 255};
-        whiteColor.setRGB(byw);
+        whiteColor.setRgb(byw);
 
 
         // 左右 居中
