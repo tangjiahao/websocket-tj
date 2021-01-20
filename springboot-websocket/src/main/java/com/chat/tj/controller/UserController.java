@@ -1,11 +1,5 @@
 package com.chat.tj.controller;
 
-import com.alibaba.excel.EasyExcel;
-import com.alibaba.excel.ExcelWriter;
-import com.alibaba.excel.write.metadata.WriteSheet;
-import com.chat.tj.common.config.ExportConfig;
-import com.chat.tj.common.excel.ExcelStyleStrategy;
-import com.chat.tj.common.util.ExcelUtil;
 import com.chat.tj.model.entity.RoomEntity;
 import com.chat.tj.model.entity.UserEntity;
 import com.chat.tj.model.vo.ResponseVo;
@@ -21,16 +15,9 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
-import springfox.documentation.annotations.ApiIgnore;
 
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
-import java.io.IOException;
-import java.io.InputStream;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 /**
  * @description :
@@ -120,66 +107,6 @@ public class UserController {
     @ApiOperation(value = "删除好友")
     public ResponseVo<Integer> deleteFriend(Integer userId, Integer friendId) {
         return userService.deleteFriend(userId, friendId);
-    }
-
-    @PostMapping("/export")
-    @ApiIgnore
-    @ApiOperation("不用模板导出")
-    public void exportData(String userName, HttpServletResponse response, HttpServletRequest request) throws IOException {
-        List<UserResVO> list = userService.findUserList(userName);
-        String fileName = "聊天导出数据测试" + System.currentTimeMillis();
-        // 设置导出excel响应头样式
-        ExcelUtil.setExcelResponse(request, response, fileName);
-        // 写法1,只有一个sheet页面导出
-        // EasyExcel.write(response.getOutputStream(), UserResVO.class).sheet("测试").doWrite(list);
-
-        // 写法2，多sheet页面导出
-        ExcelWriter writer = null;
-        // 主要设置excel导出使用默认样式
-        writer = EasyExcel.write(response.getOutputStream()).registerWriteHandler(new ExcelStyleStrategy()).build();
-        WriteSheet sheet1 = EasyExcel.writerSheet(0, "导出数据1").head(UserResVO.class).build();
-        writer.write(list, sheet1);
-        WriteSheet sheet2 = EasyExcel.writerSheet(1, "导出数据2").head(UserResVO.class).build();
-        writer.write(list, sheet2);
-        writer.finish();
-    }
-
-    @PostMapping("/exportWithTemplate")
-    @ApiIgnore
-    @ApiOperation("使用模板填充导出(带样式)")
-    public void exportData2(String userName, HttpServletResponse response, HttpServletRequest request) throws IOException {
-        List<UserResVO> list = userService.findUserList(userName);
-
-        String fileName = "chatUserExport";
-        // 设置导出excel表响应头样式
-        ExcelUtil.setExcelResponse(request, response, fileName);
-        // 获取模板
-        String template = ExportConfig.TEMPLATE_PATH + ExportConfig.TEMPLATE_NAME;
-        InputStream templateInputStream = this.getClass().getResourceAsStream(template);
-        // 写法1,只有一个sheet页面导出
-        // EasyExcel.write(response.getOutputStream(), UserResVO.class).withTemplate(templateInputStream).sheet().doFill(list);
-
-        // 写法2，多sheet页面导出
-        ExcelWriter writer = null;
-        writer = EasyExcel.write(response.getOutputStream()).withTemplate(templateInputStream).build();
-        WriteSheet sheet1 = EasyExcel.writerSheet(0, "导出数据1").build();
-        Map<String, Object> map = new HashMap<>();
-        map.put("date", ExcelUtil.getNowTime());
-        // 填充一些注释的特殊数据
-        writer.fill(map, sheet1);
-        writer.fill(list, sheet1);
-
-        WriteSheet sheet2 = EasyExcel.writerSheet(1, "导出数据2").build();
-        writer.fill(list, sheet2);
-        writer.finish();
-    }
-
-    @PostMapping("/exportImg")
-    @ApiIgnore
-    @ApiOperation("导出excel包含图片")
-    public void exportImg(String img, HttpServletResponse response, HttpServletRequest request) throws IOException {
-        //画图的顶级管理器，一个sheet只能获取一个（一定要注意这点）
-
     }
 
 

@@ -71,7 +71,7 @@ public class ReflectTest {
     }
 
     public static void main(String[] args) {
-        testFieldAndMethod(new TestResVO());
+        // testFieldAndMethod(new TestResVO());
         getInstance(new TestResVO());
 
     }

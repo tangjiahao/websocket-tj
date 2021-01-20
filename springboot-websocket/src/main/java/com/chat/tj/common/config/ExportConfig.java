@@ -6,7 +6,9 @@ package com.chat.tj.common.config;
  */
 public class ExportConfig {
 
-    public static final String TEMPLATE_NAME ="template.xlsx";
+    public static final String TEMPLATE_NAME = "template.xlsx";
+
+    public static final String EXCEL_TEMPLATE = "templatee.xlsx";
 
     public static final String TEMPLATE_PATH = "/excel/";
 
