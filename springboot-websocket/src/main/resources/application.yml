@@ -1,5 +1,7 @@
 server:
   port: 8080
+  tomcat:
+    basedir: D:/chat/data/temp
 
 spring:
   datasource:
@@ -16,10 +18,10 @@ spring:
       max-file-size: 50MB
       max-request-size: 50MB
 
-
 mybatis:
   configuration:
     map-underscore-to-camel-case: true
+    log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
 logging:
   level:
     learning: debug

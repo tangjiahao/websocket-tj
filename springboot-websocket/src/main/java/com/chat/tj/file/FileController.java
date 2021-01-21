@@ -152,6 +152,15 @@ public class FileController {
         // 使用模板
         String template1 = ExportConfig.TEMPLATE_PATH + ExportConfig.EXCEL_TEMPLATE;
         InputStream templateInputStream = this.getClass().getResourceAsStream(template1);
-        EasyExcel.write(response.getOutputStream(), ExcelImgExport.class).withTemplate(templateInputStream).sheet().doFill(exports);
+        // EasyExcel.write(response.getOutputStream(), ExcelImgExport.class).withTemplate(templateInputStream).sheet().doFill(exports);
+        // 写法2，多sheet页面导出
+        ExcelWriter writer = null;
+        writer = EasyExcel.write(response.getOutputStream(), ExcelImgExport.class).withTemplate(templateInputStream).build();
+        WriteSheet sheet1 = EasyExcel.writerSheet(0, "导出数据1").build();
+        writer.fill(exports, sheet1);
+
+        WriteSheet sheet2 = EasyExcel.writerSheet(1, "导出数据2").build();
+        writer.fill(exports, sheet2);
+        writer.finish();
     }
 }

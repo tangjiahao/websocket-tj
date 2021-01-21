@@ -177,6 +177,7 @@ public class WebSocket {
                         UserResVO user = members.stream().filter(s -> s.getUserName().equals(msg.getSender())).findAny().orElse(null);
                         //发送人在群组
                         if (user != null) {
+                            userService.saveRecord(msg);
                             sendMessageAll(msg);
                             return;
                         }
@@ -213,7 +214,8 @@ public class WebSocket {
 
     public synchronized void sendMessageTo(SendMsg message) throws IOException {
         if (!StringUtils.isEmpty(message.getReceiver()) && clients.get(UserConstant.INIT_ROOM_ID).get(message.getReceiver()) == null) {
-            message.setMessage("发送用户未上线，发送失败");
+            userService.saveRecord(message);
+            message.setMessage("发送用户未上线，已将消息保存");
             clients.get(UserConstant.INIT_ROOM_ID).get(message.getSender()).session.getAsyncRemote().sendText(JSON.toJSONString(message));
             return;
         }
@@ -223,6 +225,7 @@ public class WebSocket {
                     log.info(item.username + "连接已经被关闭");
                 }
                 item.session.getAsyncRemote().sendText(JSON.toJSONString(message));
+                userService.saveRecord(message);
                 // System.out.println(message);
                 break;
             }

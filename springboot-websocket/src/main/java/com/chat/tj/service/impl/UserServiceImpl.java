@@ -2,9 +2,11 @@ package com.chat.tj.service.impl;
 
 import com.chat.tj.common.constant.UserConstant;
 import com.chat.tj.dao.UserMapper;
+import com.chat.tj.model.SendMsg;
 import com.chat.tj.model.entity.RoomEntity;
 import com.chat.tj.model.entity.UserEntity;
 import com.chat.tj.model.vo.ResponseVo;
+import com.chat.tj.model.vo.req.MessageRecordReqVO;
 import com.chat.tj.model.vo.req.RoomReqVO;
 import com.chat.tj.model.vo.req.UserReqVO;
 import com.chat.tj.model.vo.res.RoomMemberResVO;
@@ -153,6 +155,23 @@ public class UserServiceImpl implements UserService {
             return ResponseVo.success();
         }
         userMapper.deleteFriend(userId, friendId);
+        return ResponseVo.success();
+    }
+
+    @Override
+    public ResponseVo<Integer> saveRecord(SendMsg sendMsg) {
+        userMapper.saveChatRecord(sendMsg);
+        return ResponseVo.success();
+    }
+
+    @Override
+    public ResponseVo<List<SendMsg>> getRecordList(MessageRecordReqVO reqVO) {
+        return ResponseVo.content(userMapper.getRecordList(reqVO));
+    }
+
+    @Override
+    public ResponseVo<Integer> deleteRecord() {
+        userMapper.deleteRecord();
         return ResponseVo.success();
     }
 }

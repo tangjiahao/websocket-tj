@@ -1,8 +1,10 @@
 package com.chat.tj.service;
 
+import com.chat.tj.model.SendMsg;
 import com.chat.tj.model.entity.RoomEntity;
 import com.chat.tj.model.entity.UserEntity;
 import com.chat.tj.model.vo.ResponseVo;
+import com.chat.tj.model.vo.req.MessageRecordReqVO;
 import com.chat.tj.model.vo.req.RoomReqVO;
 import com.chat.tj.model.vo.req.UserReqVO;
 import com.chat.tj.model.vo.res.RoomMemberResVO;
@@ -40,8 +42,14 @@ public interface UserService {
 
     List<UserResVO> findUserList(String userName);
 
-    ResponseVo<Integer> makeFriend(Integer userId,Integer friendId);
+    ResponseVo<Integer> makeFriend(Integer userId, Integer friendId);
 
-    ResponseVo<Integer> deleteFriend(Integer userId,Integer friendId);
+    ResponseVo<Integer> deleteFriend(Integer userId, Integer friendId);
+
+    ResponseVo<Integer> saveRecord(SendMsg sendMsg);
+
+    ResponseVo<List<SendMsg>> getRecordList(MessageRecordReqVO reqVO);
+
+    ResponseVo<Integer> deleteRecord();
 
 }

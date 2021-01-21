@@ -1,7 +1,9 @@
 package com.chat.tj.dao;
 
+import com.chat.tj.model.SendMsg;
 import com.chat.tj.model.entity.RoomEntity;
 import com.chat.tj.model.entity.UserEntity;
+import com.chat.tj.model.vo.req.MessageRecordReqVO;
 import com.chat.tj.model.vo.req.RoomReqVO;
 import com.chat.tj.model.vo.req.UserReqVO;
 import com.chat.tj.model.vo.res.RoomMemberResVO;
@@ -65,11 +67,20 @@ public interface UserMapper {
     List<UserResVO> getUserList(String userName);
 
     @Insert("INSERT INTO websocket.friend_relation VALUES(#{userId},#{friendId},now())")
-    void makeFriend(Integer userId,Integer friendId);
+    void makeFriend(Integer userId, Integer friendId);
 
     @Delete("delete from websocket.friend_relation where (user_id=#{userId} and friend_id=#{friendId}) or (user_id=#{friendId} and friend_id=#{userId})")
-    void deleteFriend(Integer userId,Integer friendId);
+    void deleteFriend(Integer userId, Integer friendId);
 
+    @Insert("INSERT into websocket.chat_record(sender,receiver,create_time,message,message_type,room_id,file_name) " +
+            "values(#{sender},#{receiver},now(),#{message},#{messageType},#{roomId},#{fileName})")
+    void saveChatRecord(SendMsg sendMsg);
+
+    @SelectProvider(type = UserSql.class, method = "getRecordList")
+    List<SendMsg> getRecordList(MessageRecordReqVO reqVO);
+
+    @Delete("delete from websocket.chat_record")
+    void deleteRecord();
 
 
 }

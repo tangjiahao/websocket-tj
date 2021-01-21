@@ -1,7 +1,9 @@
 package com.chat.tj.common.schedule;
 
 
+import com.chat.tj.service.UserService;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.scheduling.annotation.EnableScheduling;
@@ -26,6 +28,9 @@ public class ScheduledTasks {
     @Value("${file.path}")
     private String dirPath;
 
+    @Autowired
+    private UserService userService;
+
     @Scheduled(cron = "0 0 23 ? * SUN")
     //@Scheduled(cron = "0/10 * * * * *")
     public void cleanFile() {
@@ -42,6 +47,14 @@ public class ScheduledTasks {
                 }
             }
         }
+        log.info("清理结束。");
+    }
+
+    @Scheduled(cron = "0 0 23 0/2 * ?")
+    // @Scheduled(cron = "0/10 * * * * *")
+    public void cleanRecord() {
+        log.info("每2天执行一次定时任务，开始清理聊天记录...");
+        userService.deleteRecord();
         log.info("清理结束。");
     }
 

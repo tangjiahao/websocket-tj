@@ -1,8 +1,10 @@
 package com.chat.tj.controller;
 
+import com.chat.tj.model.SendMsg;
 import com.chat.tj.model.entity.RoomEntity;
 import com.chat.tj.model.entity.UserEntity;
 import com.chat.tj.model.vo.ResponseVo;
+import com.chat.tj.model.vo.req.MessageRecordReqVO;
 import com.chat.tj.model.vo.req.RoomReqVO;
 import com.chat.tj.model.vo.req.UserReqVO;
 import com.chat.tj.model.vo.res.RoomMemberResVO;
@@ -15,6 +17,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
+import springfox.documentation.annotations.ApiIgnore;
 
 import javax.validation.Valid;
 import java.util.List;
@@ -107,6 +110,26 @@ public class UserController {
     @ApiOperation(value = "删除好友")
     public ResponseVo<Integer> deleteFriend(Integer userId, Integer friendId) {
         return userService.deleteFriend(userId, friendId);
+    }
+
+    @PostMapping("/saveRecord")
+    @ApiIgnore
+    @ApiOperation(value = "保存消息")
+    public ResponseVo<Integer> saveRecord(@RequestBody SendMsg sendMsg) {
+        return userService.saveRecord(sendMsg);
+    }
+
+    @PostMapping("/getRecordList")
+    @ApiOperation(value = "查询消息记录")
+    public ResponseVo<List<SendMsg>> getRecordList(@RequestBody MessageRecordReqVO reqVO) {
+        return userService.getRecordList(reqVO);
+    }
+
+    @PostMapping("/deleteRecord")
+    @ApiIgnore
+    @ApiOperation(value = "删除记录")
+    public ResponseVo<Integer> deleteRecord() {
+        return userService.deleteRecord();
     }
 
 
