@@ -12,11 +12,10 @@ import com.chat.tj.model.vo.res.UserResVO;
 
 import java.util.List;
 
+
 /**
- * @description :
- * @Author TangJing
- * @Date 2020/12/20 10:50
- * @Version 1.0
+ * @author tangjing
+ * @date 2021/01/25 09:48
  */
 public interface UserService {
 

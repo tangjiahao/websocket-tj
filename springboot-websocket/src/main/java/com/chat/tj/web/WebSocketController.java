@@ -6,15 +6,12 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 
-import javax.websocket.OnOpen;
-import javax.websocket.Session;
-
 @Slf4j
 @Controller
 public class WebSocketController {
 
     @RequestMapping("/websocket/{name}/{roomId}")
-    public void webSocket(@PathVariable String name,@PathVariable String roomId, Model model) {
+    public void webSocket(@PathVariable String name, @PathVariable String roomId, Model model) {
         try {
             log.info("跳转到websocket的页面上");
             model.addAttribute("username", name);

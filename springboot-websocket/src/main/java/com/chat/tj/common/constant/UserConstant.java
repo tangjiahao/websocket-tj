@@ -20,6 +20,8 @@ public class UserConstant {
 
     public static final String INIT_ROOM_ID = "-1";
 
+    public static final int SYSTEM_MESSAGE = 3;
+
     public static final int GENERAL_MESSAGE = 4;
 
     public static final int IMG_MESSAGE = 5;
