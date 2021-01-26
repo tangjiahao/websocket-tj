@@ -4,6 +4,7 @@ import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 
 import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.NotNull;
 
 /**
  * 查询消息记录请求
@@ -28,5 +29,9 @@ public class MessageRecordReqVO {
 
     @ApiModelProperty("查询记录条数，不传默认查询10条 1 查询所有信息")
     private Integer recordNum;
+
+    @ApiModelProperty("查询消息种类，0好友消息 1 系统消息")
+    @NotNull(message = "消息种类不能为空")
+    private Integer messageType;
 
 }

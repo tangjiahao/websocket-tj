@@ -149,6 +149,10 @@ public class WebSocket {
         }
     }
 
+    public static synchronized int getOnlineCount() {
+        return onlineNumber;
+    }
+
     /**
      * 收到客户端的消息
      *
@@ -166,49 +170,10 @@ public class WebSocket {
                 sender = msg.getSender().substring(msg.getSender().indexOf("{") + 1, msg.getSender().indexOf("}"));
                 msg.setSender(sender);
             }
-            //messageType 1代表上线 2代表下线 3代表在线名单  4代表普通消息 5图片消息 6文件消息
-            if (msg.getMessageType() == UserConstant.GENERAL_MESSAGE || msg.getMessageType() == UserConstant.IMG_MESSAGE ||
-                    msg.getMessageType() == UserConstant.FILE_MESSAGE) {
-                if ("All".equals(msg.getReceiver())) {
-                    msg.setReceiver("所有人");
-                    List<RoomMemberResVO> members = userService.getRoomMemberList(Integer.parseInt(msg.getRoomId()));
-                    //如果群组存在
-                    if (!CollectionUtils.isEmpty(members)) {
-                        UserResVO user = members.stream().filter(s -> s.getUserName().equals(msg.getSender())).findAny().orElse(null);
-                        //发送人在群组
-                        if (user != null) {
-                            userService.saveRecord(msg);
-                            sendMessageAll(msg);
-                            return;
-                        }
-                        //发送人不在群组
-                        msg.setMessage("您未加入该群组，无法发送信息，请先加入该群组！");
-                        msg.setReceiver(sender);
-                        msg.setMessageType(UserConstant.SYSTEM_MESSAGE);
-                        sendMessageTo(msg);
-                        return;
-                    }
-                    //群组不存在
-                    msg.setMessage("发送的群组不存在，信息发送错误");
-                    msg.setReceiver(sender);
-                    msg.setMessageType(UserConstant.SYSTEM_MESSAGE);
-                    sendMessageTo(msg);
-
-                } else {
-                    msg.setRoomId(UserConstant.INIT_ROOM_ID);
-                    List<UserResVO> friendList = userService.findFriendList(getUserId(msg.getSender()));
-                    UserResVO friend = friendList.stream().filter(s -> msg.getReceiver().equals(s.getUserName())).findAny().orElse(null);
-                    //想发送的用户不是好友
-                    if (friend == null) {
-                        msg.setMessage("您和对方不是好友，请先添加好友在发送信息");
-                        msg.setSender("系统");
-                        msg.setReceiver(sender);
-                        msg.setMessageType(UserConstant.SYSTEM_MESSAGE);
-                        sendMessageTo(msg);
-                        return;
-                    }
-                    sendMessageTo(msg);
-                }
+            if ("All".equals(msg.getReceiver())) {
+                dealMessageToAll(msg, sender);
+            } else {
+                dealMessageToUser(msg, sender);
             }
         } catch (Exception e) {
             log.info("发生了错误了");
@@ -216,15 +181,18 @@ public class WebSocket {
     }
 
     public synchronized void sendMessageTo(SendMsg message) throws IOException {
+        int messageType = message.getMessageType();
+        // 用户没上线，保存消息
         if (!StringUtils.isEmpty(message.getReceiver()) && CLIENTS.get(UserConstant.INIT_ROOM_ID).get(message.getReceiver()) == null) {
             // 不是系统消息，保存
-            if (UserConstant.SYSTEM_MESSAGE != message.getMessageType()) {
+            //messageType 1加好友 2加群 3代表系统消息  4代表普通消息 5图片消息 6文件消息
+            if (UserConstant.SYSTEM_MESSAGE != messageType) {
                 userService.saveRecord(message);
+                message.setMessage("发送用户未上线，已将消息保存");
+                message.setMessageType(UserConstant.SYSTEM_MESSAGE);
+                CLIENTS.get(UserConstant.INIT_ROOM_ID).get(message.getSender()).session.getAsyncRemote().sendText(JSON.toJSONString(message));
+                return;
             }
-            message.setMessage("发送用户未上线，已将消息保存");
-            message.setMessageType(UserConstant.SYSTEM_MESSAGE);
-            CLIENTS.get(UserConstant.INIT_ROOM_ID).get(message.getSender()).session.getAsyncRemote().sendText(JSON.toJSONString(message));
-            return;
         }
         for (WebSocket item : CLIENTS.get(roomId).values()) {
             if (item.username.equals(message.getReceiver())) {
@@ -236,20 +204,16 @@ public class WebSocket {
                 break;
             }
         }
+
     }
 
     public synchronized void sendMessageAll(SendMsg msg) throws IOException {
-
         for (WebSocket item : CLIENTS.get(roomId).values()) {
             if (item.username.equals(msg.getSender())) {
                 continue;
             }
             item.session.getAsyncRemote().sendText(JSON.toJSONString(msg));
         }
-    }
-
-    public static synchronized int getOnlineCount() {
-        return onlineNumber;
     }
 
     public List<String> getrooms() {
@@ -262,6 +226,70 @@ public class WebSocket {
 
     public Integer getUserId(String username) {
         return userService.getUserId(username);
+    }
+
+    private void dealMessageToAll(SendMsg msg, String sender) throws IOException {
+        msg.setReceiver("所有人");
+        List<RoomMemberResVO> members = userService.getRoomMemberList(Integer.parseInt(msg.getRoomId()));
+        //如果群组存在
+        if (!CollectionUtils.isEmpty(members)) {
+            UserResVO user = members.stream().filter(s -> s.getUserName().equals(msg.getSender())).findAny().orElse(null);
+            //发送人在群组
+            if (user != null) {
+                userService.saveRecord(msg);
+                sendMessageAll(msg);
+                return;
+            }
+            //发送人不在群组
+            msg.setMessage("您未加入该群组，无法发送信息，请先加入该群组！");
+            msg.setReceiver(sender);
+            msg.setMessageType(UserConstant.SYSTEM_MESSAGE);
+            sendMessageTo(msg);
+            return;
+        }
+        //群组不存在
+        msg.setMessage("发送的群组不存在，信息发送错误");
+        msg.setReceiver(sender);
+        msg.setMessageType(UserConstant.SYSTEM_MESSAGE);
+        sendMessageTo(msg);
+    }
+
+    private void dealMessageToUser(SendMsg msg, String sender) throws IOException {
+        msg.setRoomId(UserConstant.INIT_ROOM_ID);
+        int type = msg.getMessageType();
+        //如果是普通消息或者图片文件消息
+        if (type == UserConstant.GENERAL_MESSAGE || type == UserConstant.IMG_MESSAGE || type == UserConstant.FILE_MESSAGE) {
+            List<UserResVO> friendList = userService.findFriendList(getUserId(msg.getSender()));
+            UserResVO friend = friendList.stream().filter(s -> msg.getReceiver().equals(s.getUserName())).findAny().orElse(null);
+            //想发送的用户不是好友
+            if (friend == null) {
+                msg.setMessage("您和对方不是好友，请先添加好友在发送信息");
+                msg.setSender("系统");
+                msg.setReceiver(sender);
+                //messageType 1加好友 2加群 3代表系统消息  4代表普通消息 5图片消息 6文件消息
+                msg.setMessageType(UserConstant.SYSTEM_MESSAGE);
+                sendMessageTo(msg);
+                return;
+            }
+            sendMessageTo(msg);
+        }
+        // 如果是加好友
+        if (type == UserConstant.ADD_FRIEND_MESSAGE) {
+            sendMessageTo(msg);
+        }
+        // 如果是加群组
+        if (type == UserConstant.ADD_ROOM_MESSAGE) {
+            List<RoomMemberResVO> members = userService.getRoomMemberList(Integer.parseInt(msg.getRoomId()));
+            if (!CollectionUtils.isEmpty(members)) {
+                RoomMemberResVO creator = members.stream().filter(s -> s.getType() == UserConstant.CREATER).findAny().orElse(null);
+                // 群主不为空
+                if (creator != null) {
+                    msg.setReceiver(creator.getUserName());
+                    msg.setRoomId(UserConstant.INIT_ROOM_ID);
+                    sendMessageTo(msg);
+                }
+            }
+        }
     }
 
 }

@@ -17,6 +17,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * @author TangJing
@@ -130,8 +131,17 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public List<UserResVO> findUserList(String userName) {
-        return userMapper.getUserList(userName);
+    public List<UserResVO> findUserList(Integer userId, String serchName) {
+        if (userId == null) {
+            return null;
+        }
+        List<UserResVO> friendList = userMapper.getFriendList(userId);
+        // 获得好友id列表
+        List<Integer> ids = friendList.stream().map(UserResVO::getUserId).collect(Collectors.toList());
+        List<UserResVO> allUser = userMapper.getUserList(serchName);
+        // 标记好友和自己
+        allUser.stream().filter(s -> ids.contains(s.getUserId()) || s.getUserId().equals(userId)).forEach(s -> s.setFriend(true));
+        return allUser;
     }
 
     @Override

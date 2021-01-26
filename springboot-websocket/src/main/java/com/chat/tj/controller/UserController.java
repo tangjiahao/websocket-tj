@@ -96,9 +96,16 @@ public class UserController {
 
     @GetMapping("/findUserList")
     @ApiOperation(value = "查找用户列表")
-    public ResponseVo<List<UserResVO>> findUserList(String userName) {
-        return ResponseVo.content(userService.findUserList(userName));
+    public ResponseVo<List<UserResVO>> findUserList(Integer userId, String serchName) {
+        return ResponseVo.content(userService.findUserList(userId, serchName));
     }
+
+    @GetMapping("/findUserId")
+    @ApiOperation(value = "查找用户Id")
+    public ResponseVo<Integer> findUserId(String userName) {
+        return ResponseVo.content(userService.getUserId(userName));
+    }
+
 
     @GetMapping("/makeFriend")
     @ApiOperation(value = "添加好友")
@@ -113,7 +120,7 @@ public class UserController {
     }
 
     @PostMapping("/saveRecord")
-    @ApiIgnore
+    // @ApiIgnore
     @ApiOperation(value = "保存消息")
     public ResponseVo<Integer> saveRecord(@RequestBody SendMsg sendMsg) {
         return userService.saveRecord(sendMsg);
@@ -121,7 +128,7 @@ public class UserController {
 
     @PostMapping("/getRecordList")
     @ApiOperation(value = "查询消息记录")
-    public ResponseVo<List<SendMsg>> getRecordList(@RequestBody MessageRecordReqVO reqVO) {
+    public ResponseVo<List<SendMsg>> getRecordList(@Valid @RequestBody MessageRecordReqVO reqVO) {
         return userService.getRecordList(reqVO);
     }
 

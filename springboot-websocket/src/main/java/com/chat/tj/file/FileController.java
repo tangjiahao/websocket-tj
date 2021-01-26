@@ -82,7 +82,7 @@ public class FileController {
     @PostMapping("/export")
     @ApiOperation("不用模板导出")
     public void exportData(String userName, HttpServletResponse response, HttpServletRequest request) throws IOException {
-        List<UserResVO> list = userService.findUserList(userName);
+        List<UserResVO> list = userService.findUserList(1, userName);
         String fileName = "聊天导出数据测试" + System.currentTimeMillis();
         // 设置导出excel响应头样式
         ExcelUtil.setExcelResponse(request, response, fileName);
@@ -103,7 +103,7 @@ public class FileController {
     @PostMapping("/exportWithTemplate")
     @ApiOperation("使用模板填充导出(带样式)")
     public void exportData2(String userName, HttpServletResponse response, HttpServletRequest request) throws IOException {
-        List<UserResVO> list = userService.findUserList(userName);
+        List<UserResVO> list = userService.findUserList(1, userName);
 
         String fileName = "chatUserExport";
         // 设置导出excel表响应头样式
