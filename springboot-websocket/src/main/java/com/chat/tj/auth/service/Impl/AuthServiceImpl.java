@@ -3,13 +3,13 @@ package com.chat.tj.auth.service.Impl;
 import com.chat.tj.auth.constant.SecretKey;
 import com.chat.tj.auth.service.AuthService;
 import com.chat.tj.auth.vo.AuthResVO;
+import com.chat.tj.chat.model.vo.ResponseVo;
+import com.chat.tj.chat.model.vo.req.UserReqVO;
+import com.chat.tj.chat.model.vo.res.UserResVO;
+import com.chat.tj.chat.service.UserService;
 import com.chat.tj.common.util.ExcelUtil;
 import com.chat.tj.common.util.MD5Util;
 import com.chat.tj.common.util.TokenCache;
-import com.chat.tj.model.vo.ResponseVo;
-import com.chat.tj.model.vo.req.UserReqVO;
-import com.chat.tj.model.vo.res.UserResVO;
-import com.chat.tj.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 

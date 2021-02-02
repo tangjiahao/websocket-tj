@@ -1,7 +1,7 @@
 package com.chat.tj.common.exception;
 
+import com.chat.tj.chat.model.vo.ResponseVo;
 import com.chat.tj.common.constant.ResponseEnums;
-import com.chat.tj.model.vo.ResponseVo;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.validation.FieldError;

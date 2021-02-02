@@ -1,6 +1,6 @@
 package com.chat.tj.auth.vo;
 
-import com.chat.tj.model.vo.req.UserReqVO;
+import com.chat.tj.chat.model.vo.req.UserReqVO;
 import io.swagger.annotations.Api;
 import lombok.Data;
 

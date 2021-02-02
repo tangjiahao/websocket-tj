@@ -3,7 +3,7 @@ package com.chat.tj.auth.controller;
 import com.chat.tj.auth.service.AuthService;
 import com.chat.tj.auth.vo.AuthReqVO;
 import com.chat.tj.auth.vo.AuthResVO;
-import com.chat.tj.model.vo.ResponseVo;
+import com.chat.tj.chat.model.vo.ResponseVo;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;

@@ -1,8 +1,8 @@
 package com.chat.tj.auth.interceptor;
 
 
+import com.chat.tj.chat.model.vo.ResponseVo;
 import com.chat.tj.common.util.TokenCache;
-import com.chat.tj.model.vo.ResponseVo;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;

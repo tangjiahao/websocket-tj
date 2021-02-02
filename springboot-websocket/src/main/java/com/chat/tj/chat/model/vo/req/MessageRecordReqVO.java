@@ -1,4 +1,4 @@
-package com.chat.tj.model.vo.req;
+package com.chat.tj.chat.model.vo.req;
 
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;

@@ -8,7 +8,9 @@ import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 
 /**
  * @author tangjing
@@ -34,19 +36,19 @@ public class ExcelUtil {
     }
 
     /**
-     * 深拷贝对象
+     * 深拷贝list
      *
-     * @param object   源对象
+     * @param object   源list对象
      * @param destclas 目标对象class
      * @param <T>      目标对象类型T
-     * @return 目标对象
+     * @return 目标对象list
      */
-    public static <T> T deepCloneObject(Object object, Class<T> destclas) {
+    public static <T> List<T> deepCloneList(List<?> object, Class<T> destclas) {
         if (object == null) {
-            return null;
+            return new ArrayList<>();
         }
         String json = JSON.toJSONString(object);
-        return JSON.parseObject(json, destclas);
+        return JSON.parseArray(json, destclas);
     }
 
     /**

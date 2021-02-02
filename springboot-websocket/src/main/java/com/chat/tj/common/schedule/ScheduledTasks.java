@@ -1,7 +1,7 @@
 package com.chat.tj.common.schedule;
 
 
-import com.chat.tj.service.UserService;
+import com.chat.tj.chat.service.UserService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;

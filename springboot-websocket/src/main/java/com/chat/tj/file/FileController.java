@@ -4,12 +4,12 @@ import com.alibaba.excel.EasyExcel;
 import com.alibaba.excel.ExcelWriter;
 import com.alibaba.excel.write.metadata.WriteSheet;
 import com.chat.tj.Test.ExcelImgExport;
+import com.chat.tj.chat.model.vo.ResponseVo;
+import com.chat.tj.chat.model.vo.res.UserResVO;
+import com.chat.tj.chat.service.UserService;
 import com.chat.tj.common.config.ExportConfig;
 import com.chat.tj.common.excel.ExcelStyleStrategy;
 import com.chat.tj.common.util.ExcelUtil;
-import com.chat.tj.model.vo.ResponseVo;
-import com.chat.tj.model.vo.res.UserResVO;
-import com.chat.tj.service.UserService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
@@ -160,6 +160,7 @@ public class FileController {
         writer.fill(exports, sheet1);
 
         WriteSheet sheet2 = EasyExcel.writerSheet(1, "导出数据2").build();
+        exports.remove(vo1);
         writer.fill(exports, sheet2);
         writer.finish();
     }

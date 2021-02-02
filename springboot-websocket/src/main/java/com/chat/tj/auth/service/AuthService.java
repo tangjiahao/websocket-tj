@@ -1,8 +1,8 @@
 package com.chat.tj.auth.service;
 
 import com.chat.tj.auth.vo.AuthResVO;
-import com.chat.tj.model.vo.ResponseVo;
-import com.chat.tj.model.vo.req.UserReqVO;
+import com.chat.tj.chat.model.vo.ResponseVo;
+import com.chat.tj.chat.model.vo.req.UserReqVO;
 
 public interface AuthService {
 

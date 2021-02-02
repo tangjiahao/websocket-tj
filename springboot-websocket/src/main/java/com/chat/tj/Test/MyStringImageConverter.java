@@ -12,6 +12,8 @@ import java.io.IOException;
 import java.util.Base64;
 
 /**
+ * 字符串图片转换工具
+ *
  * @author tangjing
  * @date 2021/01/20 14:16
  */

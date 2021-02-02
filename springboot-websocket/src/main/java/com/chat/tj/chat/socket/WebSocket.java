@@ -1,12 +1,12 @@
-package com.chat.tj.socket;
+package com.chat.tj.chat.socket;
 
 import com.alibaba.fastjson.JSON;
+import com.chat.tj.chat.model.SendMsg;
+import com.chat.tj.chat.model.vo.res.RoomMemberResVO;
+import com.chat.tj.chat.model.vo.res.RoomResVO;
+import com.chat.tj.chat.model.vo.res.UserResVO;
+import com.chat.tj.chat.service.UserService;
 import com.chat.tj.common.constant.UserConstant;
-import com.chat.tj.model.SendMsg;
-import com.chat.tj.model.entity.RoomEntity;
-import com.chat.tj.model.vo.res.RoomMemberResVO;
-import com.chat.tj.model.vo.res.UserResVO;
-import com.chat.tj.service.UserService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -97,10 +97,10 @@ public class WebSocket {
                 num = 0;
             }
             Map<String, WebSocket> temp;
-            List<String> roomIds = getrooms();
+            List<Integer> roomIds = getrooms();
             if (roomIds != null) {
                 //查看群组是否存在,如果群组存在
-                if (roomIds.contains(roomId)) {
+                if (roomIds.contains(Integer.parseInt(roomId))) {
                     temp = CLIENTS.get(roomId);
                     if (CLIENTS.get(roomId) == null) {
                         temp = new ConcurrentHashMap<>(500);
@@ -194,7 +194,7 @@ public class WebSocket {
                 return;
             }
         }
-        for (WebSocket item : CLIENTS.get(roomId).values()) {
+        for (WebSocket item : CLIENTS.get(UserConstant.INIT_ROOM_ID).values()) {
             if (item.username.equals(message.getReceiver())) {
                 if (!item.session.isOpen()) {
                     log.info(item.username + "连接已经被关闭");
@@ -216,12 +216,12 @@ public class WebSocket {
         }
     }
 
-    public List<String> getrooms() {
-        List<RoomEntity> rooms = userService.getRoomList("");
+    public List<Integer> getrooms() {
+        List<RoomResVO> rooms = userService.getRoomList(UserConstant.YES, "");
         if (CollectionUtils.isEmpty(rooms)) {
             return null;
         }
-        return rooms.stream().map(RoomEntity::getRoomId).collect(Collectors.toList());
+        return rooms.stream().map(RoomResVO::getRoomId).collect(Collectors.toList());
     }
 
     public Integer getUserId(String username) {
@@ -255,7 +255,6 @@ public class WebSocket {
     }
 
     private void dealMessageToUser(SendMsg msg, String sender) throws IOException {
-        msg.setRoomId(UserConstant.INIT_ROOM_ID);
         int type = msg.getMessageType();
         //如果是普通消息或者图片文件消息
         if (type == UserConstant.GENERAL_MESSAGE || type == UserConstant.IMG_MESSAGE || type == UserConstant.FILE_MESSAGE) {
@@ -284,9 +283,10 @@ public class WebSocket {
                 RoomMemberResVO creator = members.stream().filter(s -> s.getType() == UserConstant.CREATER).findAny().orElse(null);
                 // 群主不为空
                 if (creator != null) {
+                    msg.setMessage(msg.getReceiver());
                     msg.setReceiver(creator.getUserName());
-                    msg.setRoomId(UserConstant.INIT_ROOM_ID);
                     sendMessageTo(msg);
+
                 }
             }
         }
