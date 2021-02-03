@@ -4,6 +4,8 @@ import lombok.Data;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
+import java.util.ArrayList;
+import java.util.Vector;
 
 /**
  * 反射机制的测试文件
@@ -70,9 +72,59 @@ public class ReflectTest {
 
     }
 
+    // 反射获取arraylist的capacity
+    public static int getCapacityOfArrayList(ArrayList arrayList) {
+
+        try {
+            // 测试获取属性值
+            // Field defaultCapacity = ArrayList.class.getDeclaredField("DEFAULT_CAPACITY");
+            // defaultCapacity.setAccessible(true);
+            // System.out.println(defaultCapacity.get(arrayList));
+            Field elementData = ArrayList.class.getDeclaredField("elementData");
+            elementData.setAccessible(true);
+            return ((Object[]) elementData.get(arrayList)).length;
+        } catch (NoSuchFieldException | IllegalAccessException e) {
+            e.printStackTrace();
+            return -1;
+        }
+    }
+
+    // 获取vector的capacity
+    public static int getCapacityOfVector(Vector vector) {
+        try {
+            Field elementData = Vector.class.getDeclaredField("elementData");
+            elementData.setAccessible(true);
+            return ((Object[]) elementData.get(vector)).length;
+        } catch (NoSuchFieldException | IllegalAccessException e) {
+            e.printStackTrace();
+            return -1;
+        }
+    }
+
     public static void main(String[] args) {
         // testFieldAndMethod(new TestResVO());
-        getInstance(new TestResVO());
+        // getInstance(new TestResVO());
+        ArrayList<Object> s = new ArrayList<>();
+        System.out.println("默认s-capacity:" + getCapacityOfArrayList(s));
+        s.add(1);
+        s.add("ace");
+        System.out.println("添加元素后，s-size:" + s.size() + " s-capacity:" + getCapacityOfArrayList(s));
+        for (int i = 0; i < 10; i++) {
+            s.add(i);
+        }
+        System.out.println("超过旧的capacity大小后：");
+        System.out.println("s-size:" + s.size() + " s-capacity:" + getCapacityOfArrayList(s));
+
+        Vector<Object> v = new Vector<>();
+        System.out.println("默认v-capacity:" + getCapacityOfVector(v));
+        v.add(1);
+        v.add("ace");
+        System.out.println("添加元素后，v-size:" + v.size() + " v-capacity:" + getCapacityOfVector(v));
+        for (int i = 0; i < 11; i++) {
+            v.add(i);
+        }
+        System.out.println("超过旧的capacity大小后：");
+        System.out.println("v-size:" + v.size() + " v-capacity:" + getCapacityOfVector(v));
 
     }
 

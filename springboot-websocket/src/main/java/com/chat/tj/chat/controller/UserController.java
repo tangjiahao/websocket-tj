@@ -25,10 +25,8 @@ import javax.validation.Valid;
 import java.util.List;
 
 /**
- * @description :
- * @Author TangJing
- * @Date 2020/12/20 10:46
- * @Version 1.0
+ * @author tangjing
+ * @date 2021/12/04 15:31
  */
 @RestController
 @RequestMapping("api/user")
