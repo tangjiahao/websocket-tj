@@ -89,8 +89,8 @@ public class UserServiceImpl implements UserService {
         if (entity != null) {
             return ResponseVo.failed("群名称已被占用，创建失败!");
         }
-        List<RoomEntity> entities = userMapper.getRoomListByUserId(reqVO.getUserId());
-        if (entities.size() >= UserConstant.ROOM_LIMIT) {
+        int num = userMapper.countCreater(reqVO);
+        if (num >= UserConstant.ROOM_LIMIT) {
             return ResponseVo.failed("每个用户能创建的群组数量最多为3，创建失败");
         }
         //创建群
@@ -140,6 +140,13 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public ResponseVo<String> deleteRoomMember(Integer roomId, Integer userId) {
+        RoomReqVO reqVO = new RoomReqVO();
+        reqVO.setRoomId(roomId);
+        reqVO.setUserId(userId);
+        int flag = userMapper.isRoomCreater(reqVO);
+        if (flag > 0) {
+            return ResponseVo.failed("群主无法退出群聊，请直接解散群聊");
+        }
         //删除群组里的用户
         userMapper.deleteRoomUser(roomId, userId);
         return ResponseVo.success();

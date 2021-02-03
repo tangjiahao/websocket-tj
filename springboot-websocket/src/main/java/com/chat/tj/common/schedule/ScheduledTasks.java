@@ -50,10 +50,10 @@ public class ScheduledTasks {
         log.info("清理结束。");
     }
 
-    @Scheduled(cron = "0 0 23 0/2 * ?")
+    @Scheduled(cron = "0 0 23 0/10 * ?")
     // @Scheduled(cron = "0/10 * * * * *")
     public void cleanRecord() {
-        log.info("每2天执行一次定时任务，开始清理聊天记录...");
+        log.info("每10天执行一次定时任务，开始清理聊天记录...");
         userService.deleteRecord();
         log.info("清理结束。");
     }

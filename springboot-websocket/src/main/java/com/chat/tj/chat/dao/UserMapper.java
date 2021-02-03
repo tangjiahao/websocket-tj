@@ -128,6 +128,15 @@ public interface UserMapper {
     void deleteRoomUser(Integer roomId, Integer userId);
 
     /**
+     * 统计创建了多少个群
+     *
+     * @param reqVO 请求
+     * @return 结果
+     */
+    @Select("SELECT count(1) FROM websocket.room_user where user_id=#{userId} and type=1")
+    Integer countCreater(RoomReqVO reqVO);
+
+    /**
      * 判断是否为群主
      *
      * @param reqVO 请求

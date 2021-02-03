@@ -90,7 +90,7 @@ public class UserController {
         return userService.createRoom(reqVO);
     }
 
-    @PostMapping("/deleteRoomMember")
+    @GetMapping("/deleteRoomMember")
     @ApiOperation(value = "删除群成员")
     public ResponseVo<String> deleteRoomMember(Integer roomId, Integer userId) {
         return userService.deleteRoomMember(roomId, userId);
