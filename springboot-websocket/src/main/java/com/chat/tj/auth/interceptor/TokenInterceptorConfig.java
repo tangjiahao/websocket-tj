@@ -19,12 +19,12 @@ public class TokenInterceptorConfig implements WebMvcConfigurer {
     @Override
     public void addInterceptors(InterceptorRegistry registry) {
         // 后台
-        // registry.addInterceptor(userTokenInterceptor)
-        //         .addPathPatterns("/api/user/**", "/file/**")
-        //         // 添加后端不需要验证的接口
-        //         .excludePathPatterns("/auth/token")
-        //         // swagger地址过滤
-        //         .excludePathPatterns("/swagger-resources/**", "/webjars/**", "/v2/**", "/swagger-ui.html/**");
+        registry.addInterceptor(userTokenInterceptor)
+                .addPathPatterns("/api/user/**", "/file/**")
+                // 添加后端不需要验证的接口
+                .excludePathPatterns("/auth/token", "/api/user/register", "/api/user/login")
+                // swagger地址过滤
+                .excludePathPatterns("/swagger-resources/**", "/webjars/**", "/v2/**", "/swagger-ui.html/**");
     }
 
 

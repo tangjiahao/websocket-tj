@@ -30,7 +30,7 @@ public class AuthServiceImpl implements AuthService {
         }
         UserResVO resVO = userService.login(reqVO).getContent();
         if (resVO == null) {
-            return ResponseVo.failed("账号密码错误，鉴权失败");
+            return ResponseVo.failed("账号密码错误，登录失败");
         }
         AuthResVO authResVO = new AuthResVO();
         authResVO.setUserResVO(resVO);

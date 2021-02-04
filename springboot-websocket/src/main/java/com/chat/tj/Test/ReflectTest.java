@@ -72,6 +72,7 @@ public class ReflectTest {
 
     }
 
+
     // 反射获取arraylist的capacity
     public static int getCapacityOfArrayList(ArrayList arrayList) {
 
@@ -104,6 +105,15 @@ public class ReflectTest {
     public static void main(String[] args) {
         // testFieldAndMethod(new TestResVO());
         // getInstance(new TestResVO());
+        validCollectionSourceCode();
+        ArrayList<Object> ace = new ArrayList<>();
+        ace.add(123);
+        Object old = ace.set(0, "mike");
+        System.out.println("new0:" + ace.get(0) + " old0:" + old);
+
+    }
+
+    private static void validCollectionSourceCode() {
         ArrayList<Object> s = new ArrayList<>();
         System.out.println("默认s-capacity:" + getCapacityOfArrayList(s));
         s.add(1);
@@ -126,6 +136,16 @@ public class ReflectTest {
         System.out.println("超过旧的capacity大小后：");
         System.out.println("v-size:" + v.size() + " v-capacity:" + getCapacityOfVector(v));
 
+        // 测试虚拟机最大容量
+        // ArrayList<Object> ace = new ArrayList<>();
+        // for(int i=0;i<Integer.MAX_VALUE;i++){
+        //     ace.add(i);
+        // }
+        // ace.add(1);
+        // ace.add(234);
+        // System.out.println(getCapacityOfArrayList(ace));
     }
+
+
 
 }
