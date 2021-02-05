@@ -31,4 +31,6 @@ public class UserConstant {
     public static final int IMG_MESSAGE = 5;
 
     public static final int FILE_MESSAGE = 6;
+
+    public static final String MEMEBER = "member";
 }

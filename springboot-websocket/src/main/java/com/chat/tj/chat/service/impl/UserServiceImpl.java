@@ -15,6 +15,7 @@ import com.chat.tj.chat.model.vo.res.UserResVO;
 import com.chat.tj.chat.service.UserService;
 import com.chat.tj.common.constant.UserConstant;
 import com.chat.tj.common.util.ExcelUtil;
+import com.chat.tj.common.util.RedisUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
@@ -31,6 +32,9 @@ public class UserServiceImpl implements UserService {
     @Autowired
     private UserMapper userMapper;
 
+    @Autowired
+    private RedisUtil redisUtil;
+
     @Override
     public List<RoomEntity> findRoomList(Integer userId) {
         List<RoomEntity> result = userMapper.getRoomListByUserId(userId);
@@ -44,7 +48,16 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public List<RoomMemberResVO> getRoomMemberList(Integer roomId) {
-        return userMapper.getRoomMemberList(roomId);
+        // 先查询redis缓存
+        List<Object> result = redisUtil.lGet(roomId + "Memebers", 0, -1);
+        if (!CollectionUtils.isEmpty(result)) {
+            return redisUtil.coverterList(result, RoomMemberResVO.class);
+        }
+        List<RoomMemberResVO> resVOList = userMapper.getRoomMemberList(roomId);
+        if (!CollectionUtils.isEmpty(resVOList)) {
+            redisUtil.lSet(roomId + "Memebers", resVOList, 30);
+        }
+        return resVOList;
     }
 
     @Override
@@ -114,6 +127,8 @@ public class UserServiceImpl implements UserService {
         reqVO.setRoomId(entity.getRoomId());
         reqVO.setType(UserConstant.GENERAL);
         userMapper.addRoomUser(reqVO);
+        //成员列表更新,删除缓存的群组成员列表
+        redisUtil.del(entity.getRoomId() + UserConstant.MEMEBER);
         return ResponseVo.content(UserConstant.YES);
     }
 
@@ -147,6 +162,8 @@ public class UserServiceImpl implements UserService {
         }
         //删除群组里的用户
         userMapper.deleteRoomUser(roomId, userId);
+        //成员列表更新,删除缓存的群组成员列表
+        redisUtil.del(roomId + UserConstant.MEMEBER);
         return ResponseVo.success();
     }
 
