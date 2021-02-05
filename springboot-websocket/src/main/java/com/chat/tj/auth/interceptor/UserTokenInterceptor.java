@@ -27,6 +27,7 @@ public class UserTokenInterceptor extends HandlerInterceptorAdapter {
     public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) {
         // 1.获取token
         String token = TokenCache.getToken(request);
+        System.out.println(request.toString());
         // 2.校验token
         // 参数token为空
         if (StringUtils.isEmpty(token)) {

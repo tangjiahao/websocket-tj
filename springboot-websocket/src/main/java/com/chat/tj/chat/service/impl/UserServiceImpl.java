@@ -24,8 +24,6 @@ import java.util.stream.Collectors;
 
 /**
  * @author TangJing
- * @version 1.0
- * @description :用户业务层
  * @date 2020/12/20 10:46
  */
 @Service

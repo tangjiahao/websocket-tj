@@ -16,17 +16,22 @@ import org.springframework.util.StringUtils;
 import javax.websocket.*;
 import javax.websocket.server.PathParam;
 import javax.websocket.server.ServerEndpoint;
-import java.io.IOException;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 
+
+/**
+ * @author TangJing
+ * @date 2020/12/21 10:46
+ */
 @Slf4j
 @Component
 @ServerEndpoint("/websocket/{username}/{roomId}")
 public class WebSocket {
 
+    public static final String ALL_USER = "All";
     /**
      * 在线人数
      */
@@ -79,26 +84,26 @@ public class WebSocket {
         this.username = username;
         this.session = session;
         this.roomId = roomId;
+        // 初始化聊天大厅
         if (CLIENTS.get(UserConstant.INIT_ROOM_ID) == null) {
             Map<String, WebSocket> initRoom = new ConcurrentHashMap<>(500);
             CLIENTS.put(UserConstant.INIT_ROOM_ID, initRoom);
             ROOM_ONLINE_NUM.put(UserConstant.INIT_ROOM_ID, 0);
         }
-        // 将所有用户的连接都统一先放置到聊天大厅
+        // 如果连接用户不存在聊天大厅，所有用户的连接先统一先放置到聊天大厅
         if (CLIENTS.get(UserConstant.INIT_ROOM_ID).get(username) == null) {
             CLIENTS.get(UserConstant.INIT_ROOM_ID).put(username, this);
             ROOM_ONLINE_NUM.put(UserConstant.INIT_ROOM_ID, ROOM_ONLINE_NUM.get(UserConstant.INIT_ROOM_ID) + 1);
         }
         CLIENTS.get(UserConstant.INIT_ROOM_ID).putIfAbsent(username, this);
         log.info(username + "加入聊天大厅");
+        // 如果连接的是群组
         if (!StringUtils.isEmpty(roomId) && !UserConstant.INIT_ROOM_ID.equals(roomId)) {
             Integer num = ROOM_ONLINE_NUM.get(roomId);
-            if (num == null) {
-                num = 0;
-            }
+            num = (num == null) ? 0 : num;
             Map<String, WebSocket> temp;
             List<Integer> roomIds = getrooms();
-            if (roomIds != null) {
+            if (!CollectionUtils.isEmpty(roomIds)) {
                 //查看群组是否存在,如果群组存在
                 if (roomIds.contains(Integer.parseInt(roomId))) {
                     temp = CLIENTS.get(roomId);
@@ -163,14 +168,13 @@ public class WebSocket {
     public void onMessage(String message, Session session) {
         try {
             log.info("来自客户端消息：" + message + "客户端的id是：" + session.getId());
-            // JSONObject jsonObject = JSON.parseObject(message);
             SendMsg msg = JSON.parseObject(message, SendMsg.class);
             String sender = msg.getSender();
             if (msg.getSender().contains("{")) {
                 sender = msg.getSender().substring(msg.getSender().indexOf("{") + 1, msg.getSender().indexOf("}"));
                 msg.setSender(sender);
             }
-            if ("All".equals(msg.getReceiver())) {
+            if (ALL_USER.equals(msg.getReceiver())) {
                 dealMessageToAll(msg, sender);
             } else {
                 dealMessageToUser(msg, sender);
@@ -180,7 +184,7 @@ public class WebSocket {
         }
     }
 
-    public synchronized void sendMessageTo(SendMsg message) throws IOException {
+    public synchronized void sendMessageTo(SendMsg message) {
         int messageType = message.getMessageType();
         // 用户没上线，保存消息
         if (!StringUtils.isEmpty(message.getReceiver()) && CLIENTS.get(UserConstant.INIT_ROOM_ID).get(message.getReceiver()) == null) {
@@ -207,7 +211,7 @@ public class WebSocket {
 
     }
 
-    public synchronized void sendMessageAll(SendMsg msg) throws IOException {
+    public synchronized void sendMessageAll(SendMsg msg) {
         for (WebSocket item : CLIENTS.get(roomId).values()) {
             if (item.username.equals(msg.getSender())) {
                 continue;
@@ -228,7 +232,7 @@ public class WebSocket {
         return userService.getUserId(username);
     }
 
-    private void dealMessageToAll(SendMsg msg, String sender) throws IOException {
+    private void dealMessageToAll(SendMsg msg, String sender) {
         msg.setReceiver("所有人");
         List<RoomMemberResVO> members = userService.getRoomMemberList(Integer.parseInt(msg.getRoomId()));
         //如果群组存在
@@ -254,7 +258,7 @@ public class WebSocket {
         sendMessageTo(msg);
     }
 
-    private void dealMessageToUser(SendMsg msg, String sender) throws IOException {
+    private void dealMessageToUser(SendMsg msg, String sender) {
         int type = msg.getMessageType();
         //如果是普通消息或者图片文件消息
         if (type == UserConstant.GENERAL_MESSAGE || type == UserConstant.IMG_MESSAGE || type == UserConstant.FILE_MESSAGE) {
@@ -281,7 +285,7 @@ public class WebSocket {
             List<RoomMemberResVO> members = userService.getRoomMemberList(Integer.parseInt(msg.getRoomId()));
             if (!CollectionUtils.isEmpty(members)) {
                 RoomMemberResVO creator = members.stream().filter(s -> s.getType() == UserConstant.CREATER).findAny().orElse(null);
-                // 群主不为空
+                // 群主不为空,将信息接受者设置为群主
                 if (creator != null) {
                     msg.setMessage(msg.getReceiver());
                     msg.setReceiver(creator.getUserName());
