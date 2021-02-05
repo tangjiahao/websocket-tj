@@ -4,6 +4,7 @@ package com.chat.tj.auth.interceptor;
 import com.chat.tj.chat.model.vo.ResponseVo;
 import com.chat.tj.common.util.TokenCache;
 import lombok.extern.slf4j.Slf4j;
+import org.slf4j.MDC;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
 import org.springframework.web.servlet.handler.HandlerInterceptorAdapter;
@@ -33,11 +34,12 @@ public class UserTokenInterceptor extends HandlerInterceptorAdapter {
         if (StringUtils.isEmpty(token)) {
             return writeAuthResponse(response, ResponseVo.STATUS_CODE.LOGIN_WITHOUT);
         }
-        String userName = TokenCache.getKey(token);
+        String userId = TokenCache.getKey(token);
         // 3.token 错误
-        if (StringUtils.isEmpty(userName)) {
+        if (StringUtils.isEmpty(userId)) {
             return writeAuthResponse(response, ResponseVo.STATUS_CODE.LOGIN_TOKEN_ERROR);
         }
+        MDC.put("userId", userId);
         return true;
     }
 

@@ -44,8 +44,8 @@ public class AuthServiceImpl implements AuthService {
             TokenCache.remove(romoveToken);
             TokenCache.remove(reqVO.getUserName());
         }
-        TokenCache.setKey(reqVO.getUserName(), token);
-        TokenCache.setKey(token, reqVO.getUserName());
+        TokenCache.setKey(String.valueOf(resVO.getUserId()), token);
+        TokenCache.setKey(token, String.valueOf(resVO.getUserId()));
         return ResponseVo.content(authResVO);
 
     }
