@@ -8,6 +8,7 @@ import com.chat.tj.chat.model.vo.req.RoomReqVO;
 import com.chat.tj.chat.model.vo.req.UpdateRoomRoleReqVO;
 import com.chat.tj.chat.model.vo.req.UserReqVO;
 import com.chat.tj.chat.model.vo.res.RoomMemberResVO;
+import com.chat.tj.chat.model.vo.res.UserDetailResVO;
 import com.chat.tj.chat.model.vo.res.UserResVO;
 import org.apache.ibatis.annotations.*;
 
@@ -54,8 +55,17 @@ public interface UserMapper {
      * @param userEntity 用户信息
      */
     @Insert("INSERT into websocket.user(user_name,pwd,create_time) values(#{userName},#{pwd},now())")
-    @Options(useGeneratedKeys = true, keyProperty = "user_id", keyColumn = "report_id")
+    @Options(useGeneratedKeys = true, keyProperty = "userId", keyColumn = "user_id")
     void saveUser(UserEntity userEntity);
+
+    /**
+     * 管理员创建用户，指定角色权限
+     *
+     * @param userEntity 用户信息
+     */
+    @Insert("INSERT into websocket.user(user_name,pwd,create_time,role_id) values(#{userName},#{pwd},now(),#{roleId})")
+    @Options(useGeneratedKeys = true, keyProperty = "userId", keyColumn = "user_id")
+    void createUser(UserEntity userEntity);
 
     /**
      * 登录
@@ -154,6 +164,15 @@ public interface UserMapper {
      */
     @SelectProvider(type = UserSql.class, method = "getUserList")
     List<UserResVO> getUserList(String userName);
+
+    /**
+     * 获取用户详细信息列表，传了名字表示指定查询
+     *
+     * @param userName 用户名
+     * @return 结果集
+     */
+    @SelectProvider(type = UserSql.class, method = "getUserList")
+    List<UserDetailResVO> getUserDetailList(String userName);
 
     /**
      * 添加好友

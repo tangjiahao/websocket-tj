@@ -1,6 +1,7 @@
 package com.chat.tj.auth.interceptor;
 
 
+import com.chat.tj.auth.constant.AuthConstant;
 import com.chat.tj.chat.model.vo.ResponseVo;
 import com.chat.tj.common.util.TokenCache;
 import lombok.extern.slf4j.Slf4j;
@@ -39,7 +40,9 @@ public class UserTokenInterceptor extends HandlerInterceptorAdapter {
         if (StringUtils.isEmpty(userId)) {
             return writeAuthResponse(response, ResponseVo.STATUS_CODE.LOGIN_TOKEN_ERROR);
         }
-        MDC.put("userId", userId);
+        String roldId = TokenCache.getKey(userId + AuthConstant.ROLE_ID);
+        MDC.put(AuthConstant.USER_ID, userId);
+        MDC.put(AuthConstant.ROLE_ID, roldId);
         return true;
     }
 

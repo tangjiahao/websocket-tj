@@ -32,5 +32,9 @@ public class UserConstant {
 
     public static final int FILE_MESSAGE = 6;
 
-    public static final String MEMEBER = "member";
+    public static final String MEMEBER = "-member";
+
+    public static final String JOIN_ROOM = "-joinRoom";
+
+    public static final Integer EXPIRE_TIME = 30000;
 }

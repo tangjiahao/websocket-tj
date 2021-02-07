@@ -1,5 +1,6 @@
 package com.chat.tj.auth.service.Impl;
 
+import com.chat.tj.auth.constant.AuthConstant;
 import com.chat.tj.auth.constant.SecretKey;
 import com.chat.tj.auth.service.AuthService;
 import com.chat.tj.auth.vo.AuthResVO;
@@ -39,13 +40,18 @@ public class AuthServiceImpl implements AuthService {
         String token = MD5Util.encode(encodeString);
         authResVO.setToken(token);
         // 当前用户在guava的缓存中存在token
-        if (TokenCache.getKey(reqVO.getUserName()) != null) {
-            String romoveToken = TokenCache.getKey(reqVO.getUserName());
+        if (TokenCache.getKey(String.valueOf(resVO.getUserId())) != null) {
+            String userId = String.valueOf(resVO.getUserId());
+            String romoveToken = TokenCache.getKey(userId);
             TokenCache.remove(romoveToken);
-            TokenCache.remove(reqVO.getUserName());
+            TokenCache.remove(userId);
+            TokenCache.remove(userId + AuthConstant.ROLE_ID);
         }
+        // 存储用户token
         TokenCache.setKey(String.valueOf(resVO.getUserId()), token);
         TokenCache.setKey(token, String.valueOf(resVO.getUserId()));
+        // 存储用户的角色id
+        TokenCache.setKey(resVO.getUserId() + AuthConstant.ROLE_ID, resVO.getRoleId());
         return ResponseVo.content(authResVO);
 
     }

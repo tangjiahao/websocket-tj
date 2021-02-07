@@ -10,6 +10,7 @@ import com.chat.tj.chat.model.vo.req.UpdateRoomRoleReqVO;
 import com.chat.tj.chat.model.vo.req.UserReqVO;
 import com.chat.tj.chat.model.vo.res.RoomMemberResVO;
 import com.chat.tj.chat.model.vo.res.RoomResVO;
+import com.chat.tj.chat.model.vo.res.UserDetailResVO;
 import com.chat.tj.chat.model.vo.res.UserResVO;
 
 import java.util.List;
@@ -31,6 +32,8 @@ public interface UserService {
 
     ResponseVo<Integer> register(UserEntity userEntity);
 
+    ResponseVo<Integer> createUser(UserEntity userEntity);
+
     List<RoomResVO> getRoomList(Integer userId, String roomName);
 
     Integer getUserId(String userName);
@@ -44,6 +47,8 @@ public interface UserService {
     ResponseVo<String> deleteRoomMember(Integer roomId, Integer userId);
 
     List<UserResVO> findUserList(Integer userId, String serchName);
+
+    List<UserDetailResVO> findUserDetailList(String serchName);
 
     ResponseVo<Integer> makeFriend(Integer userId, Integer friendId);
 

@@ -1,5 +1,6 @@
 package com.chat.tj.chat.controller;
 
+import com.chat.tj.auth.annotation.RolePermission;
 import com.chat.tj.chat.model.SendMsg;
 import com.chat.tj.chat.model.entity.RoomEntity;
 import com.chat.tj.chat.model.entity.UserEntity;
@@ -10,6 +11,7 @@ import com.chat.tj.chat.model.vo.req.UpdateRoomRoleReqVO;
 import com.chat.tj.chat.model.vo.req.UserReqVO;
 import com.chat.tj.chat.model.vo.res.RoomMemberResVO;
 import com.chat.tj.chat.model.vo.res.RoomResVO;
+import com.chat.tj.chat.model.vo.res.UserDetailResVO;
 import com.chat.tj.chat.model.vo.res.UserResVO;
 import com.chat.tj.chat.service.UserService;
 import io.swagger.annotations.Api;
@@ -70,6 +72,15 @@ public class UserController {
         return userService.register(userEntity);
     }
 
+    @PostMapping("/createUser")
+    @ApiOperation(value = "管理员创建用户")
+    @RolePermission(roleId = "1")
+    public ResponseVo<Integer> createUser(@Valid @RequestBody UserReqVO reqVO) {
+        UserEntity userEntity = new UserEntity();
+        BeanUtils.copyProperties(reqVO, userEntity);
+        return userService.createUser(userEntity);
+    }
+
     @GetMapping("/findRoomList")
     @ApiOperation(value = "查找群组列表")
     public ResponseVo<List<RoomResVO>> findRoomList(Integer userId, String roomName) {
@@ -105,6 +116,13 @@ public class UserController {
     @ApiOperation(value = "查找用户列表")
     public ResponseVo<List<UserResVO>> findUserList(Integer userId, String serchName) {
         return ResponseVo.content(userService.findUserList(userId, serchName));
+    }
+
+    @GetMapping("/userDetailList")
+    @ApiOperation(value = "查找用户详细信息列表")
+    @RolePermission(roleId = "1")
+    public ResponseVo<List<UserDetailResVO>> findUserList(String serchName) {
+        return ResponseVo.content(userService.findUserDetailList(serchName));
     }
 
     @GetMapping("/findUserId")

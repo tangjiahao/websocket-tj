@@ -17,13 +17,12 @@ public class UserResVO {
     @ApiModelProperty("用户id")
     private Integer userId;
 
+    @ApiModelProperty(value = "角色id", hidden = true)
+    private String roleId;
+
     @ExcelProperty("用户名")
     @ApiModelProperty("用户名")
     private String userName;
-
-    // @ExcelIgnore
-    // @ApiModelProperty("创建时间")
-    // private String createTime;
 
     @ApiModelProperty("是否是好友，true表示是好友，false表示不是好友")
     private Boolean friend;

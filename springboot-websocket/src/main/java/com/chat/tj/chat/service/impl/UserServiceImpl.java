@@ -11,6 +11,7 @@ import com.chat.tj.chat.model.vo.req.UpdateRoomRoleReqVO;
 import com.chat.tj.chat.model.vo.req.UserReqVO;
 import com.chat.tj.chat.model.vo.res.RoomMemberResVO;
 import com.chat.tj.chat.model.vo.res.RoomResVO;
+import com.chat.tj.chat.model.vo.res.UserDetailResVO;
 import com.chat.tj.chat.model.vo.res.UserResVO;
 import com.chat.tj.chat.service.UserService;
 import com.chat.tj.common.constant.UserConstant;
@@ -49,13 +50,14 @@ public class UserServiceImpl implements UserService {
     @Override
     public List<RoomMemberResVO> getRoomMemberList(Integer roomId) {
         // 先查询redis缓存
-        List<Object> result = redisUtil.lGet(roomId + "Memebers", 0, -1);
+        List<Object> result = redisUtil.lGet(roomId + UserConstant.MEMEBER, 0, -1);
         if (!CollectionUtils.isEmpty(result)) {
             return redisUtil.coverterList(result, RoomMemberResVO.class);
         }
         List<RoomMemberResVO> resVOList = userMapper.getRoomMemberList(roomId);
         if (!CollectionUtils.isEmpty(resVOList)) {
-            redisUtil.lSet(roomId + "Memebers", resVOList, 30);
+            // 增加30分钟的缓存
+            redisUtil.lSet(roomId + UserConstant.MEMEBER, resVOList, UserConstant.EXPIRE_TIME);
         }
         return resVOList;
     }
@@ -77,6 +79,16 @@ public class UserServiceImpl implements UserService {
             return ResponseVo.content(flag);
         }
         return ResponseVo.failed("用户昵称已被占用，请重新注册");
+    }
+
+    @Override
+    public ResponseVo<Integer> createUser(UserEntity userEntity) {
+        Integer flag = userMapper.findUserId(userEntity.getUserName());
+        if (flag == null) {
+            userMapper.createUser(userEntity);
+            return ResponseVo.content(flag);
+        }
+        return ResponseVo.failed("用户昵称已被占用，请重新创建");
     }
 
     @Override
@@ -179,6 +191,11 @@ public class UserServiceImpl implements UserService {
         // 标记好友和自己
         allUser.stream().filter(s -> ids.contains(s.getUserId()) || s.getUserId().equals(userId)).forEach(s -> s.setFriend(true));
         return allUser;
+    }
+
+    @Override
+    public List<UserDetailResVO> findUserDetailList(String serchName) {
+        return userMapper.getUserDetailList(serchName);
     }
 
     @Override

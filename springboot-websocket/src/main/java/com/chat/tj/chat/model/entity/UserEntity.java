@@ -18,6 +18,9 @@ public class UserEntity {
     @ApiModelProperty("用户名")
     private String userName;
 
+    @ApiModelProperty("角色id")
+    private Integer roleId;
+
     @ApiModelProperty("密码")
     private String pwd;
 

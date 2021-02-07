@@ -125,7 +125,7 @@ public class WebSocket {
     }
 
     @OnError
-    public void onError(Session session, Throwable error) {
+    public void onError(Throwable error) {
         log.info("服务端发生了错误" + error.getMessage());
         //error.printStackTrace();
     }
