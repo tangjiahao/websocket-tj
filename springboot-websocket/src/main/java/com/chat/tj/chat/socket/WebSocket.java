@@ -147,6 +147,7 @@ public class WebSocket {
                             ROOM_ONLINE_NUM.put(id, --num);
                             CLIENTS.get(id).remove(userName);
                             log.info("群组号：" + id + ",用户：" + userName + "已退出连接");
+                            break;
                         }
                     }
                 });
