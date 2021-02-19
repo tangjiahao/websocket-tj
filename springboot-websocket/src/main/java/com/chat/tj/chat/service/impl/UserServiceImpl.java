@@ -1,6 +1,7 @@
 package com.chat.tj.chat.service.impl;
 
 import com.chat.tj.chat.dao.UserMapper;
+import com.chat.tj.chat.model.ObserveMsg;
 import com.chat.tj.chat.model.SendMsg;
 import com.chat.tj.chat.model.entity.RoomEntity;
 import com.chat.tj.chat.model.entity.UserEntity;
@@ -15,6 +16,8 @@ import com.chat.tj.chat.model.vo.res.UserDetailResVO;
 import com.chat.tj.chat.model.vo.res.UserResVO;
 import com.chat.tj.chat.service.UserService;
 import com.chat.tj.common.constant.UserConstant;
+import com.chat.tj.common.observe.ObserveCode;
+import com.chat.tj.common.observe.RedisObservable;
 import com.chat.tj.common.util.ExcelUtil;
 import com.chat.tj.common.util.RedisUtil;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -139,8 +142,10 @@ public class UserServiceImpl implements UserService {
         reqVO.setRoomId(entity.getRoomId());
         reqVO.setType(UserConstant.GENERAL);
         userMapper.addRoomUser(reqVO);
+        // 成员列表更新,删除缓存的群组成员列表,抛出redis信息，唤醒观察者响应
+        RedisObservable.throwMessage(new ObserveMsg(ObserveCode.ROOM_MEMBER_CHANGE, entity.getRoomId() + UserConstant.MEMEBER));
         //成员列表更新,删除缓存的群组成员列表
-        redisUtil.del(entity.getRoomId() + UserConstant.MEMEBER);
+        // redisUtil.del(entity.getRoomId() + UserConstant.MEMEBER);
         return ResponseVo.content(UserConstant.YES);
     }
 
@@ -175,7 +180,9 @@ public class UserServiceImpl implements UserService {
         //删除群组里的用户
         userMapper.deleteRoomUser(roomId, userId);
         //成员列表更新,删除缓存的群组成员列表
-        redisUtil.del(roomId + UserConstant.MEMEBER);
+        // redisUtil.del(roomId + UserConstant.MEMEBER);
+        // 成员列表更新,删除缓存的群组成员列表,抛出redis信息，唤醒观察者响应
+        RedisObservable.throwMessage(new ObserveMsg(ObserveCode.ROOM_MEMBER_CHANGE, roomId + UserConstant.MEMEBER));
         return ResponseVo.success();
     }
 
