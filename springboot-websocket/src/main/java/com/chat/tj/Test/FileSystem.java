@@ -91,7 +91,8 @@ public class FileSystem {
         // 绝对路径删除文件夹和包含的文件
 //        deleteFolder("E:\\FileTest\\codefile");
 //        deleteFolder("codeCreate");
-        deleteFolder("E:\\FileTest\\hello.txt");
+        //deleteFolder("E:\\FileTest\\hello.txt");
+        //deleteFolder("static");
 
 
     }
