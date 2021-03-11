@@ -9,6 +9,7 @@ import com.chat.tj.chat.model.vo.req.UpdateRoomRoleReqVO;
 import com.chat.tj.chat.model.vo.req.UserReqVO;
 import com.chat.tj.chat.model.vo.res.RoomMemberResVO;
 import com.chat.tj.chat.model.vo.res.UserDetailResVO;
+import com.chat.tj.chat.model.vo.res.UserExcelResVO;
 import com.chat.tj.chat.model.vo.res.UserResVO;
 import org.apache.ibatis.annotations.*;
 
@@ -20,6 +21,15 @@ import java.util.List;
  */
 @Mapper
 public interface UserMapper {
+
+    /**
+     * 用户批量插入
+     *
+     * @param users 用户信息
+     */
+    @InsertProvider(type = UserSql.class, method = "batchInsertUser")
+    void batchInsertUser(@Param("list") List<UserExcelResVO> users);
+
     /**
      * 查询用户所在群组列表
      *

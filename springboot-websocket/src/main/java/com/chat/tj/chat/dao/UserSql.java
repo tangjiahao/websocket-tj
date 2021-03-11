@@ -1,8 +1,13 @@
 package com.chat.tj.chat.dao;
 
 import com.chat.tj.chat.model.vo.req.MessageRecordReqVO;
+import com.chat.tj.chat.model.vo.res.UserExcelResVO;
 import com.chat.tj.common.constant.UserConstant;
+import org.apache.ibatis.annotations.Param;
 import org.springframework.util.StringUtils;
+
+import java.text.MessageFormat;
+import java.util.List;
 
 /**
  * @author tangjing
@@ -62,6 +67,19 @@ public class UserSql {
         sql.append("DELETE FROM websocket.room_user where room_id=#{roomId}");
         if (userId != null) {
             sql.append(" AND user_id=").append(userId);
+        }
+        return sql.toString();
+    }
+
+    public String batchInsertUser(@Param("list") List<UserExcelResVO> list) {
+        StringBuilder sql = new StringBuilder("insert into websocket.user(user_id,user_name,pwd) VALUES ");
+        MessageFormat mf = new MessageFormat(
+                "(#'{'list[{0}].userId},#'{'list[{0}].userName},#'{'list[{0}].pwd})");
+        for (int i = 0; i < list.size(); i++) {
+            sql.append(mf.format(new Object[]{i}));
+            if (i < list.size() - 1) {
+                sql.append(",");
+            }
         }
         return sql.toString();
     }

@@ -4,12 +4,15 @@ import com.alibaba.excel.EasyExcel;
 import com.alibaba.excel.ExcelWriter;
 import com.alibaba.excel.write.metadata.WriteSheet;
 import com.chat.tj.Test.ExcelImgExport;
+import com.chat.tj.chat.dao.UserMapper;
 import com.chat.tj.chat.model.vo.ResponseVo;
+import com.chat.tj.chat.model.vo.res.UserExcelResVO;
 import com.chat.tj.chat.model.vo.res.UserResVO;
 import com.chat.tj.chat.service.UserService;
 import com.chat.tj.common.config.ExportConfig;
 import com.chat.tj.common.excel.ExcelStyleStrategy;
 import com.chat.tj.common.util.ExcelUtil;
+import com.chat.tj.file.listener.ReadUserInfoListener;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
@@ -18,6 +21,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
@@ -46,6 +50,9 @@ public class FileController {
 
     @Autowired
     private UserService userService;
+
+    @Autowired
+    private UserMapper userMapper;
 
     @PostMapping(value = "upload")
     public ResponseVo<String> upload(MultipartFile file) {
@@ -163,5 +170,26 @@ public class FileController {
         exports.remove(vo1);
         writer.fill(exports, sheet2);
         writer.finish();
+    }
+
+    @PostMapping("/readExcel")
+    @ApiOperation("导入文件")
+    public ResponseVo<String> readExcel(@RequestParam("file") MultipartFile file, HttpServletRequest request) throws IOException {
+        String userId = request.getHeader("userId") == null ? "ace" : request.getHeader("userId");
+        String originalFilename = file.getOriginalFilename();
+        //文件名校验
+        if (originalFilename != null && !originalFilename.endsWith(".xlsx")) {
+            return ResponseVo.failed("请上传正确的xlsx文件");
+        }
+        try {
+            InputStream userInfo = file.getInputStream();
+            //不设置表头行读取所有数据,以验证模板
+            EasyExcel.read(file.getInputStream(), UserExcelResVO.class, new ReadUserInfoListener(userMapper, userId)).sheet().headRowNumber(-1).doRead();
+        } catch (Exception e) {
+            log.error("用户批量导入失败" + e);
+            return ResponseVo.failed("用户批量导入失败:" + e.getMessage());
+        }
+        return ResponseVo.success();
+
     }
 }
