@@ -30,4 +30,7 @@ public class ExcelImgExport {
     @ExcelProperty(value = {"String图片"}, converter = MyStringImageConverter.class)
     @ApiModelProperty("图片")
     private String string;
+
+    @ExcelProperty(value = "base64图片")
+    private byte[] img;
 }

@@ -1,6 +1,7 @@
 package com.chat.tj.common.util;
 
 import com.alibaba.fastjson.JSON;
+import sun.misc.BASE64Decoder;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -49,6 +50,31 @@ public class ExcelUtil {
         }
         String json = JSON.toJSONString(object);
         return JSON.parseArray(json, destclas);
+    }
+
+    /**
+     * Base64转byte[]
+     *
+     * @param field Base64
+     * @return byte[]
+     */
+    public static byte[] getImageByBase64(String field) {
+        BASE64Decoder decoder = new BASE64Decoder();
+        field = field.replaceAll("data:image/jpeg;base64,", "");
+        // Base64解码
+        byte[] imageByte = null;
+        try {
+            imageByte = decoder.decodeBuffer(field);
+            for (int i = 0; i < imageByte.length; ++i) {
+                if (imageByte[i] < 0) {// 调整异常数据
+                    imageByte[i] += 256;
+                }
+            }
+            return imageByte;
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return null;
     }
 
     /**
