@@ -1,6 +1,6 @@
 spring:
   profiles:
-    active: dev
+    active: test
   #设置上传单个文件大小和总数据大小
   servlet:
     multipart:
